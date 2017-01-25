@@ -10,7 +10,7 @@ library(gdalUtils)
 library(rworldmap)
 
 # Runs the python script that downloads data available through WMS
-system('python Python/download.py')
+system('python Python/sedac_haz_pm25.py')
 
 # Runs the bash script that downloads the monthly MODIS NDVI data
 system('Bash/./modis_ndvi.sh')
@@ -38,10 +38,3 @@ annualpm25 <- raster('data/annualpm25.tif')
 # Loads GDP per cell datasets into memory (MER and PPP 2005)
 gecon_mer <- raster('data/gecon/mer2005sum.asc')
 gecon_ppp <- raster('data/gecon/ppp2005sum.asc')
-
-# Handles the HDF files - NDVI
-ndvi_sub <- get_subdatasets(ndvi)
-for (month in ndvi_sub){
-  
-}
-r <- raster(sds[1])
