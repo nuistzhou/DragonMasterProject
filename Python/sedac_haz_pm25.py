@@ -10,6 +10,9 @@ from owslib.wms import WebMapService
 import urllib2
 import zipfile
 
+# Changes directory to file directory
+os.chdir(os.path.dirname(sys.argv[0]))
+
 # Creates data dir if not exists within project folder
 if not os.path.exists('../data'):
     os.makedirs('../data')

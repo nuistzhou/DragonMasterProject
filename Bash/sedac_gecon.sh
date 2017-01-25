@@ -1,6 +1,7 @@
 #!/bin/bash
 # Downloads GECON data from SEDAC (PPP2005 and MER2005)
 
+cd Bash
 mkdir -p ../data
 
 wget -L --user=rodrigoalmeida94 --password=RmA20071994 --load-cookies ~/.cookies --save-cookies ~/.cookies --no-directories http://sedac.ciesin.columbia.edu/downloads/data/spatialecon/spatialecon-gecon-v4/spatialecon-gecon-v4-gis-ascii.zip
