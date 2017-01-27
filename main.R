@@ -3,11 +3,11 @@
 # 23/01/2017
 
 # ---- setup ----
-# Installs necessary requirments
-system('./requirements.sh')
-if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap)) {
-  install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap'))
-}
+# Installs necessary requirements
+# system('./requirements.sh')
+# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap)) {
+#  install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap'))
+#}
 
 # Libraries needed
 library(raster)
@@ -35,6 +35,7 @@ hazards_files <- list.files('data', pattern = 'haz_*', full.names = T)
 for (haz in hazards_files){
   assign(basename(file_path_sans_ext(haz)),raster(haz))
 }
+rm(haz,hazards_files)
 
 # Loads NDVI monthly datasest into memory
 ndvi_files <- list.files('data', pattern = 'MOD13C2*', full.names = T)
@@ -46,9 +47,14 @@ names(ndvi_reliability) <- ndvi.months
 for (i in 1:12){
   # NDVI is subdataset 1
   ndvi[i] <- raster(get_subdatasets(ndvi_files[i])[1])
+  ndvi[[i]]@data@names <- paste0('NDVI',ndvi.months[i])
+  ndvi[[i]]@data@names <- getValues(ndvi[[i]])
   # Reliability is subdataset 13 (0, 0 is good -4)
   ndvi_reliability[i] <- raster(get_subdatasets(ndvi_files[i])[13])
+  ndvi_reliability[[i]]@data@names <- paste0('NDVI_reliability',ndvi.months[i])
+  ndvi_reliability[[i]]@data@names <- getValues(ndvi_reliability[[i]])
 }
+rm(ndvi_files, ndvi.months, i)
 
 # Loads polution dataset into memory
 annualpm25 <- raster('data/annualpm25.tif')
@@ -63,24 +69,30 @@ gecon_ppp@data@names <- 'gecon_ppp'
 # Gets all files into a vector that is passed to the data_summary func
 all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
 data_summary <- summary_data(all_files)
+rm(all_files)
 print(data_summary)
 
 # Make histograms of the data
 
 # Plot the data
 
-# Get the smallest pixel size and coordinate projection arguments of that cell size
+# Get the template raster object and the projection string
 min_resx <- min(unlist(data_summary[,'resx']))
-min_resy <- min(unlist(data_summary[,'resy']))
+min_resy <- min(unlist(data_summary[,'resy']))                
 proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
-proj <- proj[1,'projargs']
+proj_str <- unlist(proj[1,'projargs'])
+set_raster <- proj[1,'raster'][[1]]
+rm(proj, min_resx, min_resy)
 
 # ---- file-preprocessing ----
 # Select all objects that have a different projection
-to_reproj <- data_summary[data_summary[,'projargs']!=proj[[1]],'raster']
-# Reproject the objects
-for(r in to_reproj){
-  assign(r@data@names, projectRaster(r,crs=proj[[1]]))
-}
+to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
+rm(data_summary)
 
-proj# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
+# Reprojects and resamples the objects
+for(r in to_reproj){
+  assign(r@data@names, projectRaster(r,crs=proj_str))
+}
+rm(r,to_reproj)
+
+# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
