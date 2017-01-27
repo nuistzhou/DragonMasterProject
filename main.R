@@ -48,11 +48,9 @@ for (i in 1:12){
   # NDVI is subdataset 1
   ndvi[i] <- raster(get_subdatasets(ndvi_files[i])[1])
   ndvi[[i]]@data@names <- paste0('NDVI',ndvi.months[i])
-  ndvi[[i]]@data@names <- getValues(ndvi[[i]])
   # Reliability is subdataset 13 (0, 0 is good -4)
   ndvi_reliability[i] <- raster(get_subdatasets(ndvi_files[i])[13])
   ndvi_reliability[[i]]@data@names <- paste0('NDVI_reliability',ndvi.months[i])
-  ndvi_reliability[[i]]@data@names <- getValues(ndvi_reliability[[i]])
 }
 rm(ndvi_files, ndvi.months, i)
 
@@ -89,9 +87,9 @@ rm(proj, min_resx, min_resy)
 to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
 rm(data_summary)
 
-# Reprojects and resamples the objects
+# Reprojects and resamples the objects - WHATCHOUT FOR MEMORY
 for(r in to_reproj){
-  assign(r@data@names, projectRaster(r,crs=proj_str))
+  projectRaster(r,set_raster)
 }
 rm(r,to_reproj)
 
