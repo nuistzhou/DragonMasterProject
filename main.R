@@ -16,6 +16,8 @@ library(rgdal)
 library(gdalUtils)
 library(rworldmap)
 
+rasterOptions(tmpdir="data/temp/")
+
 # Source files
 source('R/summary_data.R')
 
@@ -68,7 +70,6 @@ gecon_ppp@data@names <- 'gecon_ppp'
 all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
 data_summary <- summary_data(all_files)
 rm(all_files)
-print(data_summary)
 
 # Make histograms of the data
 
@@ -87,9 +88,9 @@ rm(proj, min_resx, min_resy)
 to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
 rm(data_summary)
 
-# Reprojects and resamples the objects - WHATCHOUT FOR MEMORY
+# Reprojects and resamples the objects - WHATCHOUT FOR MEMORY - changed tmp dir in the beginning, at least 5 GB
 for(r in to_reproj){
-  projectRaster(r,set_raster)
+  projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), overwrite = T)
 }
 rm(r,to_reproj)
 
