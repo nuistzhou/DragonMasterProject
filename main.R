@@ -16,15 +16,18 @@ library(rgdal)
 library(gdalUtils)
 library(rworldmap)
 
+# Source files
+source('R/summary_data.R')
+
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
-system('python Python/sedac_haz_pm25.py')
+#system('python Python/sedac_haz_pm25.py')
 
 # Runs the bash script that downloads the monthly MODIS NDVI data
-system('Bash/./modis_ndvi.sh')
+#system('Bash/./modis_ndvi.sh')
 
 # Runs the bash script that downloads the SEDAC GECON data (GDP per cell)
-system('Bash/./sedac_gecon.sh')
+#system('Bash/./sedac_gecon.sh')
 
 # ---- read-files ----
 # Loads the hazards dataset into memory
@@ -53,5 +56,31 @@ annualpm25 <- raster('data/annualpm25.tif')
 # Loads GDP per cell datasets into memory (MER and PPP 2005)
 gecon_mer <- raster('data/gecon/MER2005sum.asc')
 gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
+gecon_mer@data@names <- 'gecon_mer'
+gecon_ppp@data@names <- 'gecon_ppp'
 
-# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
+# ---- files-info ----
+# Gets all files into a vector that is passed to the data_summary func
+all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
+data_summary <- summary_data(all_files)
+print(data_summary)
+
+# Make histograms of the data
+
+# Plot the data
+
+# Get the smallest pixel size and coordinate projection arguments of that cell size
+min_resx <- min(unlist(data_summary[,'resx']))
+min_resy <- min(unlist(data_summary[,'resy']))
+proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
+proj <- proj[1,'projargs']
+
+# ---- file-preprocessing ----
+# Select all objects that have a different projection
+to_reproj <- data_summary[data_summary[,'projargs']!=proj[[1]],'raster']
+# Reproject the objects
+for(r in to_reproj){
+  assign(r@data@names, projectRaster(r,crs=proj[[1]]))
+}
+
+proj# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
