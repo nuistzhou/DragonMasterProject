@@ -5,8 +5,8 @@
 # ---- setup ----
 # Installs necessary requirements
 # system('./requirements.sh')
-# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap)) {
-#  install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap'))
+# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(rworldxtra) ) {
+# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra'))
 #}
 
 # Libraries needed
@@ -15,6 +15,7 @@ library(tools)
 library(rgdal)
 library(gdalUtils)
 library(rworldmap)
+library(rworldxtra)
 
 # Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
@@ -106,13 +107,15 @@ r_annualpm25 <- raster('data/r_annualpm25.tif')
 r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
 rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
+# Remove if run from source
+ndvi_mean <- raster('data/ndvi_mean.tif')
 
-# Clean up data, adds aditional information
+# Adds aditional information
 r_annualpm25@data@unit <- 'microg*m^-3'
 r_gecon_mer@data@unit <- 'US dollars'
 r_gecon_ppp@data@unit <- 'US dollars'
 
+# Gets continental (countries) boundaries
+world <- getMap(resolution = 'high')
+world <- spTransform(world, ndvi_mean@crs)
 
-
-
-# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
