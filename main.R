@@ -59,7 +59,6 @@ for (i in 1:12){
 rm(ndvi_files, ndvi.months, i)
 
 # Cleans data according to reliability, calculates the annual mean
-# Gives warning <- promise evaluation??
 ndvi_mean <- ndvi_annual_mean(ndvi, ndvi_reliability)
 rm(ndvi,ndvi_reliability)
 
@@ -108,7 +107,12 @@ r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
 rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
 
-# Clean up data, no data value to NA
+# Clean up data, adds aditional information
+r_annualpm25@data@unit <- 'microg*m^-3'
+r_gecon_mer@data@unit <- 'US dollars'
+r_gecon_ppp@data@unit <- 'US dollars'
+
+
 
 
 # Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
