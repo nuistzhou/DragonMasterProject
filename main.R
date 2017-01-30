@@ -73,7 +73,7 @@ gecon_ppp@data@names <- 'gecon_ppp'
 
 # ---- files-info ----
 # Gets all files into a vector that is passed to the data_summary func
-all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
+all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano, ndvi_mean)
 data_summary <- summary_data(all_files)
 rm(all_files)
 
@@ -81,8 +81,8 @@ rm(all_files)
 min_resx <- min(unlist(data_summary[,'resx']))
 min_resy <- min(unlist(data_summary[,'resy']))                
 proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
-proj_str <- unlist(proj[1,'projargs'])
-set_raster <- proj[1,'raster'][[1]]
+proj_str <- proj$projargs
+set_raster <- proj$raster
 rm(proj, min_resx, min_resy)
 
 # ---- file-preprocessing ----
@@ -107,7 +107,12 @@ r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
 rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
 
-# Clean up data, no data value to NA
+# Clean up data, adds aditional information
+r_annualpm25@data@unit <- 'microg*m^-3'
+r_gecon_mer@data@unit <- 'US dollars'
+r_gecon_ppp@data@unit <- 'US dollars'
+
+
 
 
 # Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
