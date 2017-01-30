@@ -18,8 +18,9 @@ library(rworldmap)
 library(rworldxtra)
 library(cleangeo)
 
-in# Changes temp dir to location with space, at least 5 GB free
+# Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
+rasterOptions(maxmemory=1e+12)
 
 # Source files
 source('R/summary_data.R')
@@ -91,13 +92,13 @@ rm(proj, min_resx, min_resy)
 # ---- file-preprocessing ----
 # Select all objects that have a different projection
 to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
-rm(data_summary)
+rm(data_summary, proj_str)
 
 # Reprojects and resamples the objects - WHATCHOUT FOR MEMORY - changed tmp dir in the beginning, at least 5 GB
 for(r in to_reproj){
-  projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), overwrite = T)
+  projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
 }
-rm(r,to_reproj)
+rm(r,to_reproj, set_raster)
 
 # Reads reprojected files into memory
 r_hazards_files <- list.files('data', pattern = 'r_haz_*', full.names = T)
@@ -110,7 +111,7 @@ r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
 rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
 # Remove if run from source
-ndvi_mean <- raster('data/ndvi_mean.tif')
+#ndvi_mean <- raster('data/ndvi_mean.tif')
 
 # Adds aditional information
 r_annualpm25@data@unit <- 'microg*m^-3'
@@ -121,9 +122,7 @@ r_gecon_ppp@data@unit <- 'US dollars'
 world <- getMap()
 world <- spTransform(world, ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
-#simpleWorld <- SpatialPolygonsDataFrame(simpleWorld,data=as.data.frame('dummy'))
-#writeOGR(obj = simpleWorld, dsn='data', layer ='simpleWorld',driver='ESRI Shapefile')
 
 # ---- index-calculation ----
-haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano, simpleWorld)
+haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
 
