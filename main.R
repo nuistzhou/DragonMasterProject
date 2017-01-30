@@ -81,8 +81,8 @@ rm(all_files)
 min_resx <- min(unlist(data_summary[,'resx']))
 min_resy <- min(unlist(data_summary[,'resy']))                
 proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
-proj_str <- unlist(proj[1,'projargs'])
-set_raster <- proj[1,'raster'][[1]]
+proj_str <- proj$projargs
+set_raster <- proj$raster
 rm(proj, min_resx, min_resy)
 
 # ---- file-preprocessing ----
