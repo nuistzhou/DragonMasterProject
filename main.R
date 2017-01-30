@@ -5,8 +5,8 @@
 # ---- setup ----
 # Installs necessary requirements
 # system('./requirements.sh')
-# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(rworldxtra) ) {
-# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra'))
+# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(rworldxtra) | !require(cleangeo)) {
+# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo',))
 #}
 
 # Libraries needed
@@ -16,13 +16,15 @@ library(rgdal)
 library(gdalUtils)
 library(rworldmap)
 library(rworldxtra)
+library(cleangeo)
 
-# Changes temp dir to location with space, at least 5 GB free
+in# Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
 
 # Source files
 source('R/summary_data.R')
 source('R/ndvi_annual_mean.R')
+source('R/hazards_sum.R')
 
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
@@ -116,6 +118,12 @@ r_gecon_mer@data@unit <- 'US dollars'
 r_gecon_ppp@data@unit <- 'US dollars'
 
 # Gets continental (countries) boundaries
-world <- getMap(resolution = 'high')
+world <- getMap()
 world <- spTransform(world, ndvi_mean@crs)
+simpleWorld <- gUnionCascaded(clgeo_Clean(world))
+#simpleWorld <- SpatialPolygonsDataFrame(simpleWorld,data=as.data.frame('dummy'))
+#writeOGR(obj = simpleWorld, dsn='data', layer ='simpleWorld',driver='ESRI Shapefile')
+
+# ---- index-calculation ----
+haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano, simpleWorld)
 
