@@ -8,3 +8,6 @@ index <- function(ndvi_mean,gecon,harzards,pm25,wei_ndvi_mean,wei_gecon,
 }
 
 index(ndvi_mean,r_gecon_ppp,r_haz_flood,r_annualpm25,1,2,3,4)
+
+a_masked <- mask(a,simpleWorld)
+plot(a_masked)
