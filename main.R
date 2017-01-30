@@ -16,10 +16,12 @@ library(rgdal)
 library(gdalUtils)
 library(rworldmap)
 
+# Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
 
 # Source files
 source('R/summary_data.R')
+source('R/ndvi_annual_mean.R')
 
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
@@ -56,6 +58,10 @@ for (i in 1:12){
 }
 rm(ndvi_files, ndvi.months, i)
 
+# Cleans data according to reliability, calculates the annual mean
+ndvi_mean <- ndvi_annual_mean(ndvi, ndvi_reliability)
+rm(ndvi,ndvi_reliability)
+
 # Loads polution dataset into memory
 annualpm25 <- raster('data/annualpm25.tif')
 
@@ -70,10 +76,6 @@ gecon_ppp@data@names <- 'gecon_ppp'
 all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
 data_summary <- summary_data(all_files)
 rm(all_files)
-
-# Make histograms of the data
-
-# Plot the data
 
 # Get the template raster object and the projection string
 min_resx <- min(unlist(data_summary[,'resx']))
@@ -93,5 +95,19 @@ for(r in to_reproj){
   projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), overwrite = T)
 }
 rm(r,to_reproj)
+
+# Reads reprojected files into memory
+r_hazards_files <- list.files('data', pattern = 'r_haz_*', full.names = T)
+for (haz in r_hazards_files){
+  assign(basename(file_path_sans_ext(haz)),raster(haz))
+}
+rm(haz,r_hazards_files)
+r_annualpm25 <- raster('data/r_annualpm25.tif')
+r_gecon_mer <- raster('data/r_gecon_mer.tif')
+r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
+rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
+
+# Clean up data, no data value to NA
+
 
 # Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
