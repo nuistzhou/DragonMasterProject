@@ -59,6 +59,7 @@ for (i in 1:12){
 rm(ndvi_files, ndvi.months, i)
 
 # Cleans data according to reliability, calculates the annual mean
+# Gives warning <- promise evaluation??
 ndvi_mean <- ndvi_annual_mean(ndvi, ndvi_reliability)
 rm(ndvi,ndvi_reliability)
 
@@ -73,7 +74,7 @@ gecon_ppp@data@names <- 'gecon_ppp'
 
 # ---- files-info ----
 # Gets all files into a vector that is passed to the data_summary func
-all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
+all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano, ndvi_mean)
 data_summary <- summary_data(all_files)
 rm(all_files)
 
