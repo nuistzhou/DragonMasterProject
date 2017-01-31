@@ -105,10 +105,8 @@ all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_e
 data_summary <- summary_data(all_files)
 rm(all_files)
 
-# Get the template raster object and the projection string
-min_resx <- min(unlist(data_summary[,'resx']))
-min_resy <- min(unlist(data_summary[,'resy']))                
-proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
+# Get the template raster object and the projection string (*should work on it - NDVI to WGS84, 0.05 resolution*)
+proj <- data_summary[which(data_summary[,'resx']==0.05,data_summary[,'resy']==0.05),]
 proj_str <- proj$projargs
 set_raster <- proj$raster
 rm(proj, min_resx, min_resy)
