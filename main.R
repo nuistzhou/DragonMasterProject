@@ -120,8 +120,8 @@ rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, ha
 
 # Adds aditional information
 r_annualpm25@data@unit <- 'microg*m^-3'
-r_gecon_mer@data@unit <- 'US dollars'
-r_gecon_ppp@data@unit <- 'US dollars'
+r_gecon_mer@data@unit <- 'Billions US dollars'
+r_gecon_ppp@data@unit <- 'Billions US dollars'
 
 # Gets continental (countries) boundaries
 world <- getMap()
