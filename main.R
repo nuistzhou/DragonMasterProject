@@ -25,7 +25,9 @@ rasterOptions(maxmemory=1e+12)
 # Source files
 source('R/summary_data.R')
 source('R/ndvi_annual_mean.R')
-#source('R/hazards_sum.R')
+source('R/hazards_sum.R')
+source('R/calc_index.R')
+source('R/normalization.R')
 
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
@@ -120,8 +122,8 @@ rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, ha
 
 # Adds aditional information
 r_annualpm25@data@unit <- 'microg*m^-3'
-r_gecon_mer@data@unit <- 'US dollars'
-r_gecon_ppp@data@unit <- 'US dollars'
+r_gecon_mer@data@unit <- 'Billions US dollars'
+r_gecon_ppp@data@unit <- 'Billions US dollars'
 
 # Gets continental (countries) boundaries
 world <- getMap()
@@ -129,8 +131,8 @@ world <- spTransform(world, ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
 # ---- index-calculation ----
-#haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
-index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.3, 0.3, 0.2, 0.2)
+haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
+index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.1, 0.3, 0.2, 1)
 #----- mask the index raster
 index_masked <- mask(index,simpleWorld)
 plot(index_masked)
