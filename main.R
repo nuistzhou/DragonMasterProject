@@ -44,6 +44,11 @@ for (haz in hazards_files){
   assign(basename(file_path_sans_ext(haz)),raster(haz))
 }
 rm(haz,hazards_files)
+# Since the WMS service sends the drought and landslide dataset with wrong values, we downloaded them manually
+haz_drought <- raster('data/gddrg/gddrg.asc')
+haz_landslide <- raster('data/gdlnd/gdlnd.asc')
+haz_drought@data@names <- 'haz_drought'
+haz_landslide@data@names <- 'haz_landslide'
 
 # Loads NDVI monthly datasest into memory
 ndvi_files <- list.files('data', pattern = 'MOD13C2*', full.names = T)
