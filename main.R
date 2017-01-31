@@ -5,8 +5,8 @@
 # ---- setup ----
 # Installs necessary requirements
 # system('./requirements.sh')
-# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(rworldxtra) | !require(cleangeo)) {
-# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo',))
+# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)) {
+# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata'))
 #}
 
 # Libraries needed
@@ -15,8 +15,8 @@ library(tools)
 library(rgdal)
 library(gdalUtils)
 library(rworldmap)
-#library(rworldxtra)
 library(cleangeo)
+library(gdata)
 
 # Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
@@ -33,11 +33,17 @@ source('R/normalization.R')
 # Runs the python script that downloads data available through WMS
 #system('python Python/sedac_haz_pm25.py')
 
+# Downloads the broken files via WMS
+#system('Bash/./sedac_drg_lnd.sh')
+
 # Runs the bash script that downloads the monthly MODIS NDVI data
 #system('Bash/./modis_ndvi.sh')
 
 # Runs the bash script that downloads the SEDAC GECON data (GDP per cell)
 #system('Bash/./sedac_gecon.sh')
+
+# Download GECON data xls
+#download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/gecon/Gecon40_post_final.xls')
 
 # ---- read-files ----
 # Loads the hazards dataset into memory
@@ -79,8 +85,19 @@ annualpm25 <- raster('data/annualpm25.tif')
 # Loads GDP per cell datasets into memory (MER and PPP 2005)
 gecon_mer <- raster('data/gecon/MER2005sum.asc')
 gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
+# Since the GECON data downloaded is not corrected, we've downloaded it manually
+gecon <- read.xls('data/gecon/Gecon40_post_final.xls',sheet = 1, header = T)
+gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
+gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
+gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
+coordinates(gecon) <- ~gecon.LONGITUDE + gecon.LAT
+gridded(gecon) <- T
+gecon@proj4string <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+gecon_mer <- raster(gecon["gecon.MER2005_40"])
+gecon_ppp <- raster(gecon["gecon.PPP2005_40"])
 gecon_mer@data@names <- 'gecon_mer'
 gecon_ppp@data@names <- 'gecon_ppp'
+rm(gecon)
 
 # ---- files-info ----
 # Gets all files into a vector that is passed to the data_summary func
@@ -131,8 +148,14 @@ world <- spTransform(world, ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
 # ---- index-calculation ----
+# Calculates the hazard component, (sum of all layers)
 haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
-index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.1, 0.3, 0.2, 1)
-#----- mask the index raster
-index_masked <- mask(index,simpleWorld)
-plot(index_masked)
+
+# Masks and normalizes the data, saves into file
+haz_comp_m <- mask(normalization(haz_comp), simpleWorld, filename = 'data/haz_comp_m.tif')
+ndvi_mean_m <- mask(0.00000001*ndvi_mean, simpleWorld,filename = 'data/ndvi_mean_m.tif')
+r_gecon_ppp_m <- mask(normalization(r_gecon_ppp), simpleWorld, filename = 'data/r_gecon_ppp_m.tif')
+r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'data/r_annualpm25_m.tif')
+
+# Calculates the index with all factors 1
+index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1)

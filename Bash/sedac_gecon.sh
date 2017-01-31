@@ -1,5 +1,6 @@
 #!/bin/bash
-# Downloads GECON data from SEDAC (PPP2005 and MER2005)
+# Downloads GECON data from SEDAC (PPP2005 and MER2005) 
+# Does not work!
 
 cd Bash
 mkdir -p ../data
