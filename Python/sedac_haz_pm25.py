@@ -30,16 +30,13 @@ ly = [['haz_cyclone','ndh:ndh-cyclone-hazard-frequency-distribution'],
 ['annualpm25', 'sdei:sdei-global-annual-avg-pm2-5-modis-misr-seawifs-aod-1998-2012_2010-2012']]
 
 for elem in ly:
-    BB = sedac_wms[elem[1]].boundingBox
-    resp = sedac_wms.getmap(layers = [elem[1]], srs = 'EPSG:4326', bbox = BB[0:4], format = 'image/geotiff', size = (2048,2048))
+    BB = sedac_wms[elem[1]].boundingBoxWGS84
+    resp = sedac_wms.getmap(layers = [elem[1]], srs = 'EPSG:4326', bbox = BB, format = 'image/geotiff', size = (2048,2048))
     out = open('../data/'+elem[0]+'.tif', 'wb')
     out.write(resp.read())
     out.close()
 
 exit()
-# Downloads GDP 'per cell'
-# Does not seem doable due to authentication in the SEDAC website
-
 
 
 
