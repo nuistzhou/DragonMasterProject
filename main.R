@@ -15,7 +15,7 @@ library(tools)
 library(rgdal)
 library(gdalUtils)
 library(rworldmap)
-library(rworldxtra)
+#library(rworldxtra)
 library(cleangeo)
 
 # Changes temp dir to location with space, at least 5 GB free
@@ -25,7 +25,7 @@ rasterOptions(maxmemory=1e+12)
 # Source files
 source('R/summary_data.R')
 source('R/ndvi_annual_mean.R')
-source('R/hazards_sum.R')
+#source('R/hazards_sum.R')
 
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
@@ -124,5 +124,8 @@ world <- spTransform(world, ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
 # ---- index-calculation ----
-haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
-
+#haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
+index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.3, 0.3, 0.2, 0.2)
+#----- mask the index raster
+index_masked <- mask(index,simpleWorld)
+plot(index_masked)
