@@ -4,10 +4,10 @@
 
 # ---- setup ----
 # Installs necessary requirements
-# system('./requirements.sh')
-# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)) {
-# install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata'))
-#}
+system('./requirements.sh')
+if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)) {
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata'))
+}
 
 # Libraries needed
 library(raster)
@@ -31,19 +31,19 @@ source('R/normalization.R')
 
 # ---- downloads ----
 # Runs the python script that downloads data available through WMS
-#system('python Python/sedac_haz_pm25.py')
+system('python Python/sedac_haz_pm25.py')
 
-# Downloads the broken files via WMS
-#system('Bash/./sedac_drg_lnd.sh')
+# Downloads the broken files via WMS (Drought and Landslide) - watchout for login
+system('Bash/./sedac_drg_lnd.sh')
 
-# Runs the bash script that downloads the monthly MODIS NDVI data
-#system('Bash/./modis_ndvi.sh')
+# Runs the bash script that downloads the monthly MODIS NDVI data - some times need two times (12 files)
+system('Bash/./modis_ndvi.sh')
 
-# Runs the bash script that downloads the SEDAC GECON data (GDP per cell)
-#system('Bash/./sedac_gecon.sh')
+# Runs the bash script that downloads the SEDAC GECON data (GDP per cell) - corrupted data for some reason
+system('Bash/./sedac_gecon.sh') 
 
-# Download GECON data xls
-#download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/gecon/Gecon40_post_final.xls')
+# Download GECON data xls (work around)
+download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/gecon/Gecon40_post_final.xls')
 
 # ---- read-files ----
 # Loads the hazards dataset into memory
@@ -83,9 +83,9 @@ rm(ndvi,ndvi_reliability)
 annualpm25 <- raster('data/annualpm25.tif')
 
 # Loads GDP per cell datasets into memory (MER and PPP 2005)
-gecon_mer <- raster('data/gecon/MER2005sum.asc')
-gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
-# Since the GECON data downloaded is not corrected, we've downloaded it manually
+#gecon_mer <- raster('data/gecon/MER2005sum.asc')
+#gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
+# Since the GECON data downloaded is not correct, use XLS file
 gecon <- read.xls('data/gecon/Gecon40_post_final.xls',sheet = 1, header = T)
 gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
 gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
