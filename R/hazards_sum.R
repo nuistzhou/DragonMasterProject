@@ -8,5 +8,5 @@ hazards_sum <- function(cyclone,drought,earthquake,flood,landslide,volcano){
   landslide[is.na(landslide[])] <- 0
   volcano[is.na(volcano[])] <- 0
   # Calculate the sum of 6 different hazards
-  return (sum(cyclone,drought,earthquake,flood,landslide,volcano)
+  return (sum(normalization(cyclone),normalization(drought),normalization(earthquake),normalization(flood),normalization(landslide),normalization(volcano)))
 }
