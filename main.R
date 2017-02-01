@@ -174,27 +174,32 @@ r_annualpm25 <- normalization(r_annualpm25)
 # Calculates the index, for 5 differente combinations of weights
 # Index - Same weight to all
 index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
-writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T)
+index10101010 <- index10101010*100
+writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index10101010)
 
 # Index - Greenest
 index10050505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 0.5, 0.5, 0.5,simpleWorld)
-writeRaster(index10050505, 'data/index10050505.tif', 'GTiff', overwrite =T)
+index10050505 <- index10050505*100
+writeRaster(index10050505, 'data/index10050505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index10050505)
 
 # Index - Richest
 index05100505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 1, 0.5, 0.5,simpleWorld)
-writeRaster(index05100505, 'data/index05100505.tif', 'GTiff', overwrite =T)
+index05100505 <- index05100505*100
+writeRaster(index05100505, 'data/index05100505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index05100505)
 
 # Index - Less hazards
 index05051005 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 1, 0.5,simpleWorld)
-writeRaster(index05051005, 'data/index05051005.tif', 'GTiff', overwrite =T)
+index05051005 <- index05051005*100
+writeRaster(index05051005, 'data/index05051005.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index05051005)
 
 # Index - Less polution
 index05050510 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 0.5, 1,simpleWorld)
-writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T)
+index05050510 <- index05050510*100
+writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index05050510)
 print('---- Ending index-calculation ----')
 
