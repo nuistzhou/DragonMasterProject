@@ -4,7 +4,8 @@
 
 # ---- setup ----
 # Installs necessary requirements
-system('./requirements.sh')
+print('---- Starting setup ----')
+
 if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)) {
  install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata'))
 }
@@ -29,7 +30,10 @@ source('R/hazards_sum.R')
 source('R/calc_index.R')
 source('R/normalization.R')
 
+print('---- Ending setup ----')
+
 # ---- downloads ----
+print('---- Starting downloads ----')
 # Downloads the hazards and PM2.5 datasets from SEDAC
 system('Bash/./sedac_haz_pm25.sh')
 
@@ -39,7 +43,10 @@ system('Bash/./modis_ndvi.sh')
 # Download GECON data xls
 download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/Gecon40_post_final.xls')
 
+print('---- Ending downloads ----')
+
 # ---- read-files ----
+print('---- Starting read-files ----')
 # Loads the hazards dataset into memory
 hazards_files <- list.files('data', pattern = 'haz_?.*\\.asc', full.names = T)
 for (haz in hazards_files){
@@ -85,45 +92,48 @@ gecon_mer <- raster(gecon["gecon.MER2005_40"])
 gecon_ppp <- raster(gecon["gecon.PPP2005_40"])
 gecon_mer@data@names <- 'gecon_mer'
 gecon_ppp@data@names <- 'gecon_ppp'
+writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff')
+writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff')
 rm(gecon)
 
+print('---- Ending read-files ----')
+
 # ---- files-info ----
+print('---- Starting files-info ----')
 # Gets all files into a vector that is passed to the data_summary func
 all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano, ndvi_mean)
 data_summary <- summary_data(all_files)
 rm(all_files)
 
 # Get the template raster object and the projection string (*should work on it - NDVI to WGS84, 0.05 resolution*)
-minx <- min(data_summary[,'resx'])
-miny <- min(data_summary[,'resy'])
+minx <- min(unlist(data_summary[,'resx']))
+miny <- min(unlist(data_summary[,'resy']))
 proj <- data_summary[which(data_summary[,'resx']==minx,data_summary[,'resy']==miny),]
-proj_str <- proj$projargs[1]
-set_raster <- proj$raster[1]
-rm(proj, min_resx, min_resy)
+proj_str <- proj[1,'projargs'][[1]]
+set_raster <- proj[1,'raster'][[1]]
+rm(proj)
+
+print('---- Ending files-info ----')
 
 # ---- file-preprocessing ----
+print('---- Starting file-preprocessing ----')
+print('---- This will take a while, grab a cup of coffee! :) ----')
 # Select all objects that have a different projection
-to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str,data_summary[,'resx']!=minx,data_summary[,'resy']!=miny),'raster']
-rm(data_summary, proj_str)
+to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str|data_summary[,'resx']!=minx|data_summary[,'resy']!=miny),'raster']
+rm(data_summary, proj_str, minx,miny)
 
-# Reprojects and resamples the objects - WHATCHOUT FOR MEMORY - changed tmp dir in the beginning, at least 5 GB
+# Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
 for(r in to_reproj){
   projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
 }
 rm(r,to_reproj, set_raster)
 
 # Reads reprojected files into memory
-r_hazards_files <- list.files('data', pattern = 'r_haz_*', full.names = T)
-for (haz in r_hazards_files){
-  assign(basename(file_path_sans_ext(haz)),raster(haz))
+r_files <- list.files('data', pattern = 'r_', full.names = T)
+for (r in r_files){
+  assign(basename(file_path_sans_ext(haz)),raster(r))
 }
-rm(haz,r_hazards_files)
-r_annualpm25 <- raster('data/r_annualpm25.tif')
-r_gecon_mer <- raster('data/r_gecon_mer.tif')
-r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
-rm(annualpm25,gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
-# Remove if run from source
-#ndvi_mean <- raster('data/ndvi_mean.tif')
+rm(r,r_files)
 
 # Adds aditional information
 r_annualpm25@data@unit <- 'microg*m^-3'
@@ -135,13 +145,15 @@ world <- getMap()
 world <- spTransform(world, ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
+print('---- Ending file-preprocessing ----')
+
 # ---- index-calculation ----
 # Calculates the hazard component, (sum of all layers)
-haz_comp <- hazards_sum(r_haz_cyclone, r_haz_drought, r_haz_earthquake, r_haz_flood, r_haz_landslide, r_haz_volcano)
+haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
 
 # Masks and normalizes the data, saves into file
 haz_comp_m <- mask(normalization(haz_comp), simpleWorld, filename = 'data/haz_comp_m.tif')
-ndvi_mean_m <- mask(0.00000001*ndvi_mean, simpleWorld,filename = 'data/ndvi_mean_m.tif')
+r_ndvi_mean_m <- mask(0.00000001*r_ndvi_mean, simpleWorld,filename = 'data/r_ndvi_mean_m.tif')
 r_gecon_ppp_m <- mask(normalization(r_gecon_ppp), simpleWorld, filename = 'data/r_gecon_ppp_m.tif')
 r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'data/r_annualpm25_m.tif')
 
