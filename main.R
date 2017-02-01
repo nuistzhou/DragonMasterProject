@@ -105,7 +105,7 @@ all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_e
 data_summary <- summary_data(all_files)
 rm(all_files)
 
-# Get the template raster object and the projection string (*should work on it - NDVI to WGS84, 0.05 resolution*)
+# Get the template raster object and the projection string - WGS84, 2.5 minute grid
 minx <- min(unlist(data_summary[,'resx']))
 miny <- min(unlist(data_summary[,'resy']))
 proj <- data_summary[which(data_summary[,'resx']==minx,data_summary[,'resy']==miny),]
@@ -118,8 +118,8 @@ print('---- Ending files-info ----')
 # ---- file-preprocessing ----
 print('---- Starting file-preprocessing ----')
 print('---- This will take a while, grab a cup of coffee! :) ----')
-# Select all objects that have a different projection
-to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str|data_summary[,'resx']!=minx|data_summary[,'resy']!=miny),'raster']
+# Select all objects that have a different projection, nedd to add the different extents
+to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str|data_summary[,'resx']!=minx|data_summary[,'resy']!=miny|data_summary[,'ymin']!=set_raster@extent@ymin),'raster']
 rm(data_summary, proj_str, minx,miny)
 
 # Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
@@ -131,7 +131,7 @@ rm(r,to_reproj, set_raster)
 # Reads reprojected files into memory
 r_files <- list.files('data', pattern = 'r_', full.names = T)
 for (r in r_files){
-  assign(basename(file_path_sans_ext(haz)),raster(r))
+  assign(basename(file_path_sans_ext(r)),raster(r))
 }
 rm(r,r_files)
 
@@ -149,7 +149,7 @@ print('---- Ending file-preprocessing ----')
 
 # ---- index-calculation ----
 # Calculates the hazard component, (sum of all layers)
-haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano)
+haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, r_haz_earthquake, r_haz_flood, haz_landslide, r_haz_volcano)
 
 # Masks and normalizes the data, saves into file
 haz_comp_m <- mask(normalization(haz_comp), simpleWorld, filename = 'data/haz_comp_m.tif')
@@ -158,4 +158,4 @@ r_gecon_ppp_m <- mask(normalization(r_gecon_ppp), simpleWorld, filename = 'data/
 r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'data/r_annualpm25_m.tif')
 
 # Calculates the index with all factors 1
-index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1)
+index <- calc_index(r_ndvi_mean_m,r_gecon_ppp_m, haz_comp_m, r_annualpm25_m, 1, 1, 1, 1)
