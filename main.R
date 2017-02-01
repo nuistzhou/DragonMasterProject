@@ -163,6 +163,16 @@ r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_annualpm25 <- raster('data/r_annualpm25.tif')
 
 # Masks and normalizes the data, saves into file
+<<<<<<< HEAD
+haz_comp_m <- mask(normalization(haz_comp), simpleWorld, filename = 'data/haz_comp_m.tif')
+ndvi_mean_m <- mask(0.00000001*ndvi_mean, simpleWorld,filename = 'data/ndvi_mean_m.tif')
+r_gecon_ppp_m <- mask(normalization(r_gecon_ppp), simpleWorld, filename = 'data/r_gecon_ppp_m.tif')
+r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'data/r_annualpm25_m.tif')
+
+# Calculates the index with all factors 1
+index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1)
+
+=======
 haz_comp <- normalization(haz_comp)
 r_ndvi_mean <- normalization(r_ndvi_mean)
 r_gecon_ppp <- normalization(r_gecon_ppp)
@@ -172,3 +182,4 @@ r_annualpm25 <- normalization(r_annualpm25)
 # Calculates the index, saves to file with all factors 1
 index <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
 writeRaster(index, 'data/index.tif', 'GTiff', overwrite =T)
+>>>>>>> origin/master

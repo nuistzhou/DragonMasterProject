@@ -8,6 +8,14 @@
 #
 
 library(shiny)
+# Choices for users' preference
+setwd('/home/ubuntu/Desktop/Project/shiny/nice_living/data/')
+choices <- c(
+  "Greener" = "1_0.5_0.5_0.5.tif",
+  "Richer" = "0.5_1_0.5_0.5.tif",
+  "Breathing" = "0.5_0.5_1_0.5.tif",
+  "Diaster Free" = "0.5_0.5_0.5_1.tif"
+)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -18,19 +26,12 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-       sliderInput("ndvi_wei","Factor of NDVI Influence",
-                   min=0,max=1,value=0.5),
-       sliderInput("haz_wei","Factor of Hazards Influence",
-                   min=0,max=1,value=0.5),
-       sliderInput("gecon_wei","Factor of Economic Influence",
-                   min=0,max=1,value=0.5),
-       sliderInput("pm25_wei","Factor of Air Quality Influence",
-                   min=0,max=1,value=0.5)
+      selectInput("preference", "Preference", choices) 
     ),
     
-    # Show a plot of the generated distribution
+    # Show a plot
     mainPanel(
-       plotOutput("niceliving")
+       plotOutput("map")
     )
-  )
+)
 ))

@@ -6,24 +6,25 @@
 # 
 #    http://shiny.rstudio.com/
 #
-
+library(raster)
 library(shiny)
 library(leaflet)
+setwd('/home/ubuntu/Desktop/Project/shiny/nice_living/data')
+# Loading raster layers
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
-  dataInput <- reactive(  
-  tif_files <- list.files('data', pattern = '*', full.names = T)
-  for (tif in tif_files){
-            assign(basename(file_path_sans_ext(tif)),raster(tif))
-            source('calc_index.R')}
-    )
+shinyServer(function(input,output) {
+   output$map <- renderLeaflet({
+    leaflet() %>%
+      addTiles(
+        urlTemplate = "//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      ) %>%
+#      setView(lng = 52.52, lat = 13.40, zoom = 4) %>%
+      addRasterImage(raster(input$preference), colors = "red", opacity = 0.8,group="baseGroups",project=T) %>%
+      addLayersControl(
+      baseGroups = c("Greener", "Richer", "Breathing","Hazards Free"),
+      options = layersControlOptions(collapsed = FALSE)
+  )
+ 
   })
-    output$niceliving <- renderPlot({
-    dataInput()
-    index <- calc_index(ndvi_mean_m,r_gecon_ppp_m,haz_comp_m, r_annualpm25_m,input$ndvi_wei,
-               input$haz_wei,input$gecon_wei,input$pm25_wei)
-    m <- leaflet(data=index) %>% addTiles %>%
-      addLegend(pal=qpal,values=index$data,opacity=1)
-    m
-      })
 })
