@@ -159,5 +159,6 @@ r_gecon_ppp <- normalization(r_gecon_ppp)
 r_gecon_mer <- normalization(r_gecon_mer)
 r_annualpm25 <- normalization(r_annualpm25)
 
-# Calculates the index with all factors 1
+# Calculates the index, saves to file with all factors 1
 index <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
+writeRaster(index, 'data/index.tif', 'GTiff', overwrite =T)
