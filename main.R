@@ -128,6 +128,7 @@ rm(data_summary, proj_str, minx,miny)
 # Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
 for(r in to_reproj){
   projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
+  print(paste(r,'was reprojected!'))
 }
 rm(r,to_reproj, set_raster)
 
@@ -145,12 +146,13 @@ r_gecon_ppp@data@unit <- 'Billions US dollars'
 
 # Gets continental (countries) boundaries
 world <- getMap()
-world <- spTransform(world, haz_drought@crs)
+world <- spTransform(world, r_ndvi_mean@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
 print('---- Ending file-preprocessing ----')
 
 # ---- index-calculation ----
+print('---- Starting index-calculation ----')
 # Calculates the hazard component, (sum of all layers)
 haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, r_haz_earthquake, r_haz_flood, haz_landslide, r_haz_volcano)
 writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
@@ -169,6 +171,32 @@ r_gecon_ppp <- normalization(r_gecon_ppp)
 r_gecon_mer <- normalization(r_gecon_mer)
 r_annualpm25 <- normalization(r_annualpm25)
 
-# Calculates the index, saves to file with all factors 1
-index <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
-writeRaster(index, 'data/index.tif', 'GTiff', overwrite =T)
+# Calculates the index, for 5 differente combinations of weights
+# Index - Same weight to all
+index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
+writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T)
+rm(index10101010)
+
+# Index - Greenest
+index10050505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 0.5, 0.5, 0.5,simpleWorld)
+writeRaster(index10050505, 'data/index10050505.tif', 'GTiff', overwrite =T)
+rm(index10050505)
+
+# Index - Richest
+index05100505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 1, 0.5, 0.5,simpleWorld)
+writeRaster(index05100505, 'data/index05100505.tif', 'GTiff', overwrite =T)
+rm(index05100505)
+
+# Index - Less hazards
+index05051005 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 1, 0.5,simpleWorld)
+writeRaster(index05051005, 'data/index05051005.tif', 'GTiff', overwrite =T)
+rm(index05051005)
+
+# Index - Less polution
+index05050510 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 0.5, 1,simpleWorld)
+writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T)
+rm(index05050510)
+print('---- Ending index-calculation ----')
+
+# ---- visualization ----
+source('vis.R')

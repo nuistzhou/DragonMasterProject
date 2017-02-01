@@ -13,6 +13,8 @@ __Main goal:__ Find the best country/region on earth according to a living quali
 2. Air pollution;  
 3. GDP;  
 4. Average year NDVI.  
+  
+__Warning:__ Running the entire script takes about 2 hours of computation time in the 2 core virtual machine we used. We highly recommend using the terminal.
 
 ## Setup  
 ```{r}
@@ -24,6 +26,28 @@ Our project core is located at main.R file. First, we start by setting some envi
 ## Downloads  
 For downloading the necessary datasets, we used two bash scripts called from the main script and a simple download.file function call.   
 ```{r downloads, eval = FALSE}
+```
+For the porpuses of the SEDAC data downloaded we used the following wget command.
+```{bash, eval = FALSE}
+# Example for Drought Hazard dataset
+wget -L --user=rodrigoalmeida94 --password=*RmA20071994**** --load-cookies ~/.cookies --save-cookies ~/.cookies --no-directories http://sedac.ciesin.columbia.edu/downloads/data/ndh/ndh-drought-hazard-frequency-distribution/gddrg.zip
+# Unzips and places files in the right place
+unzip gddrg.zip -d ../data/
+rm gddrg.zip
+mv ../data/gddrg/gddrg.asc ../data/haz_drought.asc
+mv ../data/gddrg/gddrg.prj ../data/haz_drought.prj
+rm -r ../data/gddrg
+```
+For the MODIS NDVI product, we made a for loop that goes through every folder in the DAAC for 2016 and downloads the respective file (0.05 degrees resolution).
+```{bash, eval = FALSE}
+for i in 01 02 03 04 05 06 07 08 09 10 11 12;
+do wget -L --user=rodrigoalmeida94 --password=**** --load-cookies ~/.cookies --save-cookies ~/.cookies -r --no-parent -A '*.hdf' --no-directories -P ../data/http://e4ftl01.cr.usgs.gov/MOLT/MOD13C2.006/2016.$i.01/
+done
+```
+The GECON datasets were available in SEDAC as well, but unfortunately the data had some issues, so we decided to make the raster layer ourselfs from the XLS file provided in the project website.  
+## Read files
+```{r read-files, eval=FALSE}
+
 ```
 
 
