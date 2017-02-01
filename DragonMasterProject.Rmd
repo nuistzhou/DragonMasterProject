@@ -45,9 +45,19 @@ do wget -L --user=rodrigoalmeida94 --password=**** --load-cookies ~/.cookies --s
 done
 ```
 The GECON datasets were available in SEDAC as well, but unfortunately the data had some issues, so we decided to make the raster layer ourselfs from the XLS file provided in the project website.  
-## Read files
-```{r read-files, eval=FALSE}
 
+## Read files
+The process of reading the files into memory is quite straighforward:  
+1. Loading all the hazard files with the correct name using a for loop;  
+2. Loading the NDVI monthly data, and passing it to the annual_mean function, that returns the annual mean;  
+3. Loading the PM2.5 dataset into memory; 
+4. Creating the GECON data with the XLS file into two rasters GECON PPP and GECON MER.  
+```{r read-files, eval=FALSE, tidy=TRUE}
+
+```
+
+```{r}
+knitr::read_chunk('R/ndvi_annual_mean.R')
 ```
 
 
