@@ -1,6 +1,6 @@
 # Normalization object
 normalization <- function(raster) {
-  min <- raster@data@min
-  max <- raster@data@max
+  min <- minValue(raster)
+  max <- maxValue(raster)
   return ((raster-min)/(max-min))
 }

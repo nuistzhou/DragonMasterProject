@@ -150,12 +150,14 @@ print('---- Ending file-preprocessing ----')
 # ---- index-calculation ----
 # Calculates the hazard component, (sum of all layers)
 haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, r_haz_earthquake, r_haz_flood, haz_landslide, r_haz_volcano)
+writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
 
 # Masks and normalizes the data, saves into file
-haz_comp_m <- mask(normalization(haz_comp), simpleWorld, filename = 'data/haz_comp_m.tif')
-r_ndvi_mean_m <- mask(0.00000001*r_ndvi_mean, simpleWorld,filename = 'data/r_ndvi_mean_m.tif')
-r_gecon_ppp_m <- mask(normalization(r_gecon_ppp), simpleWorld, filename = 'data/r_gecon_ppp_m.tif')
-r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'data/r_annualpm25_m.tif')
+haz_comp <- normalization(haz_comp)
+r_ndvi_mean <- normalization(r_ndvi_mean)
+r_gecon_ppp <- normalization(r_gecon_ppp)
+r_gecon_mer <- normalization(r_gecon_mer)
+r_annualpm25 <- normalization(r_annualpm25)
 
 # Calculates the index with all factors 1
-index <- calc_index(r_ndvi_mean_m,r_gecon_ppp_m, haz_comp_m, r_annualpm25_m, 1, 1, 1, 1)
+index <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
