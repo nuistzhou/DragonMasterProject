@@ -6,8 +6,8 @@
 # Installs necessary requirements
 print('---- Starting setup ----')
 
-if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)) {
- install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata'))
+if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)| !require(leaflet)| !require(htmltools)| !require(RColorBrewer)) {
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmltools', 'RColorBrewer'))
 }
 
 # Libraries needed
@@ -18,6 +18,9 @@ library(gdalUtils)
 library(rworldmap)
 library(cleangeo)
 library(gdata)
+library(leaflet)
+library(htmltools)
+library(RColorBrewer)
 
 # Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
@@ -151,6 +154,13 @@ print('---- Ending file-preprocessing ----')
 # Calculates the hazard component, (sum of all layers)
 haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, r_haz_earthquake, r_haz_flood, haz_landslide, r_haz_volcano)
 writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
+
+# To run if not from source
+haz_comp <- raster('data/haz_comp.tif')
+r_ndvi_mean <- raster('data/r_ndvi_mean.tif')
+r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
+r_gecon_mer <- raster('data/r_gecon_mer.tif')
+r_annualpm25 <- raster('data/r_annualpm25.tif')
 
 # Masks and normalizes the data, saves into file
 haz_comp <- normalization(haz_comp)

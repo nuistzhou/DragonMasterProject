@@ -4,21 +4,26 @@ output:
   html_document: default
   html_notebook: default
 ---
-This is the final project of the Geoscripting course, period 3, 2016-2017, Wageningen University.
-Authors: Rodrigo Almeida and Ping Zhou
-January 2016
+This is the final project of the Geoscripting course, period 3, 2016-2017, Wageningen University.  
+Authors: Rodrigo Almeida and Ping Zhou  
+January 2016  
+  
+__Main goal:__ Find the best country/region on earth according to a living quality index based on:   
+1. Hazard frequency and distribution;  
+2. Air pollution;  
+3. GDP;  
+4. Average year NDVI.  
 
-__Main goal:__ Find the best country/region on earth according to: 
-1. Hazard frequency and distribution;
-2. Air pollution;
-3. GDP;
-4. Average year NDVI.
-
+## Setup  
 ```{r}
 knitr::read_chunk('main.R')
 ```
-
-```{r setup}
+Our project core is located at main.R file. First, we start by setting some environment settings, including he installation of necessary libraries and the import of such libraries. We also source the sub-scripts in the setup section.  
+```{r setup, eval=FALSE}
+```
+## Downloads  
+For downloading the necessary datasets, we used two bash scripts called from the main script and a simple download.file function call.   
+```{r downloads, eval = FALSE}
 ```
 
 
