@@ -142,7 +142,7 @@ r_gecon_ppp@data@unit <- 'Billions US dollars'
 
 # Gets continental (countries) boundaries
 world <- getMap()
-world <- spTransform(world, ndvi_mean@crs)
+world <- spTransform(world, haz_drought@crs)
 simpleWorld <- gUnionCascaded(clgeo_Clean(world))
 
 print('---- Ending file-preprocessing ----')
