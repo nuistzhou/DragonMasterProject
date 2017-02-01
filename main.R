@@ -30,33 +30,24 @@ source('R/calc_index.R')
 source('R/normalization.R')
 
 # ---- downloads ----
-# Runs the python script that downloads data available through WMS
-system('python Python/sedac_haz_pm25.py')
+# Downloads the hazards and PM2.5 datasets from SEDAC
+system('Bash/./sedac_haz_pm25.sh')
 
-# Downloads the broken files via WMS (Drought and Landslide) - watchout for login
-system('Bash/./sedac_drg_lnd.sh')
-
-# Runs the bash script that downloads the monthly MODIS NDVI data - some times need two times (12 files)
+# Runs the bash script that downloads the monthly MODIS NDVI data
 system('Bash/./modis_ndvi.sh')
 
-# Runs the bash script that downloads the SEDAC GECON data (GDP per cell) - corrupted data for some reason
-system('Bash/./sedac_gecon.sh') 
-
-# Download GECON data xls (work around)
-download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/gecon/Gecon40_post_final.xls')
+# Download GECON data xls
+download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/Gecon40_post_final.xls')
 
 # ---- read-files ----
 # Loads the hazards dataset into memory
-hazards_files <- list.files('data', pattern = 'haz_*', full.names = T)
+hazards_files <- list.files('data', pattern = 'haz_?.*\\.asc', full.names = T)
 for (haz in hazards_files){
   assign(basename(file_path_sans_ext(haz)),raster(haz))
+  a <- get(basename(file_path_sans_ext(haz)))
+  a@data@names <- basename(file_path_sans_ext(haz))
 }
-rm(haz,hazards_files)
-# Since the WMS service sends the drought and landslide dataset with wrong values, we downloaded them manually
-haz_drought <- raster('data/gddrg/gddrg.asc')
-haz_landslide <- raster('data/gdlnd/gdlnd.asc')
-haz_drought@data@names <- 'haz_drought'
-haz_landslide@data@names <- 'haz_landslide'
+rm(haz,hazards_files,a)
 
 # Loads NDVI monthly datasest into memory
 ndvi_files <- list.files('data', pattern = 'MOD13C2*', full.names = T)
@@ -80,13 +71,10 @@ ndvi_mean <- ndvi_annual_mean(ndvi, ndvi_reliability)
 rm(ndvi,ndvi_reliability)
 
 # Loads polution dataset into memory
-annualpm25 <- raster('data/annualpm25.tif')
+annualpm25 <- raster('data/annualpm25/annualpm25.tif')
 
-# Loads GDP per cell datasets into memory (MER and PPP 2005)
-#gecon_mer <- raster('data/gecon/MER2005sum.asc')
-#gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
-# Since the GECON data downloaded is not correct, use XLS file
-gecon <- read.xls('data/gecon/Gecon40_post_final.xls',sheet = 1, header = T)
+# Loads GECON data from XLS file
+gecon <- read.xls('data/Gecon40_post_final.xls',sheet = 1, header = T)
 gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
 gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
 gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
@@ -106,14 +94,16 @@ data_summary <- summary_data(all_files)
 rm(all_files)
 
 # Get the template raster object and the projection string (*should work on it - NDVI to WGS84, 0.05 resolution*)
-proj <- data_summary[which(data_summary[,'resx']==0.05,data_summary[,'resy']==0.05),]
-proj_str <- proj$projargs
-set_raster <- proj$raster
+minx <- min(data_summary[,'resx'])
+miny <- min(data_summary[,'resy'])
+proj <- data_summary[which(data_summary[,'resx']==minx,data_summary[,'resy']==miny),]
+proj_str <- proj$projargs[1]
+set_raster <- proj$raster[1]
 rm(proj, min_resx, min_resy)
 
 # ---- file-preprocessing ----
 # Select all objects that have a different projection
-to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
+to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str,data_summary[,'resx']!=minx,data_summary[,'resy']!=miny),'raster']
 rm(data_summary, proj_str)
 
 # Reprojects and resamples the objects - WHATCHOUT FOR MEMORY - changed tmp dir in the beginning, at least 5 GB
