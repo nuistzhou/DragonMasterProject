@@ -159,3 +159,4 @@ r_annualpm25_m <- mask(normalization(r_annualpm25), simpleWorld, filename = 'dat
 
 # Calculates the index with all factors 1
 index <- calc_index(ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1)
+
