@@ -128,7 +128,7 @@ rm(data_summary, proj_str, minx,miny)
 # Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
 for(r in to_reproj){
   projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
-  print(paste(r,'was reprojected!'))
+  print(paste(r@data@names,'was reprojected!'))
 }
 rm(r,to_reproj, set_raster)
 
