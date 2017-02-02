@@ -7,7 +7,7 @@
 print('---- Starting setup ----')
 
 if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)| !require(leaflet)| !require(htmltools)| !require(RColorBrewer)) {
- install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmltools', 'RColorBrewer'))
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmlwidgets', 'RColorBrewer'))
 }
 
 # Libraries needed
@@ -19,7 +19,7 @@ library(rworldmap)
 library(cleangeo)
 library(gdata)
 library(leaflet)
-library(htmltools)
+library(htmlwidgets)
 library(RColorBrewer)
 
 # Changes temp dir to location with space, at least 5 GB free
@@ -175,7 +175,7 @@ r_annualpm25 <- normalization(r_annualpm25)
 # Index - Same weight to all
 index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
 index10101010 <- index10101010*100
-writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+writeRaster(index10101010, 'data/index10101010_test.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index10101010)
 
 # Index - Greenest

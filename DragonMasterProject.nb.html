@@ -184,16 +184,43 @@ January 2016</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxua25pdHI6OnJlYWRfY2h1bmsoJ21haW4uUicpXG5gYGBcbmBgYCJ9 -->
-<p><code>r</code>r knitr::read_chunk(‘main.R’)</p>
-<pre><code></code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Our project core is located at main.R file. First, we start by setting some environment settings, including he installation of necessary libraries and the import of such libraries. We also source the sub-scripts in the setup section.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgSW5zdGFsbHMgbmVjZXNzYXJ5IHJlcXVpcmVtZW50cyIsInByaW50KCctLS0tIFN0YXJ0aW5nIHNldHVwIC0tLS0nKSIsIiIsImlmKCFyZXF1aXJlKHJhc3RlcikgfCAhcmVxdWlyZSh0b29scykgfCAhcmVxdWlyZShyZ2RhbCkgfCAhcmVxdWlyZShnZGFsVXRpbHMpIHwgIXJlcXVpcmUocndvcmxkbWFwKSB8ICFyZXF1aXJlKGNsZWFuZ2VvKSB8ICFyZXF1aXJlKGdkYXRhKXwgIXJlcXVpcmUobGVhZmxldCl8ICFyZXF1aXJlKGh0bWx0b29scyl8ICFyZXF1aXJlKFJDb2xvckJyZXdlcikpIHsiLCIgaW5zdGFsbC5wYWNrYWdlcyhjKCdyYXN0ZXInLCd0b29scycsJ3JnZGFsJywnZ2RhbFV0aWxzJywncndvcmxkbWFwJywgJ3J3b3JsZHh0cmEnLCAnY2xlYW5nZW8nLCdnZGF0YScsJ2xlYWZsZXQnLCAnaHRtbHdpZGdldHMnLCAnUkNvbG9yQnJld2VyJykpIiwifSIsIiIsIiMgTGlicmFyaWVzIG5lZWRlZCIsImxpYnJhcnkocmFzdGVyKSIsImxpYnJhcnkodG9vbHMpIiwibGlicmFyeShyZ2RhbCkiLCJsaWJyYXJ5KGdkYWxVdGlscykiLCJsaWJyYXJ5KHJ3b3JsZG1hcCkiLCJsaWJyYXJ5KGNsZWFuZ2VvKSIsImxpYnJhcnkoZ2RhdGEpIiwibGlicmFyeShsZWFmbGV0KSIsImxpYnJhcnkoaHRtbHdpZGdldHMpIiwibGlicmFyeShSQ29sb3JCcmV3ZXIpIiwiIiwiIyBDaGFuZ2VzIHRlbXAgZGlyIHRvIGxvY2F0aW9uIHdpdGggc3BhY2UsIGF0IGxlYXN0IDUgR0IgZnJlZSIsInJhc3Rlck9wdGlvbnModG1wZGlyPVwiZGF0YS90ZW1wL1wiKSIsInJhc3Rlck9wdGlvbnMobWF4bWVtb3J5PTFlKzEyKSIsIiIsIiMgU291cmNlIGZpbGVzIiwic291cmNlKCdSL3N1bW1hcnlfZGF0YS5SJykiLCJzb3VyY2UoJ1IvbmR2aV9hbm51YWxfbWVhbi5SJykiLCJzb3VyY2UoJ1IvaGF6YXJkc19zdW0uUicpIiwic291cmNlKCdSL2NhbGNfaW5kZXguUicpIiwic291cmNlKCdSL25vcm1hbGl6YXRpb24uUicpIiwiIiwicHJpbnQoJy0tLS0gRW5kaW5nIHNldHVwIC0tLS0nKSJdfQ== -->
+<pre class="r"><code># Installs necessary requirements
+print('---- Starting setup ----')
+
+if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)| !require(leaflet)| !require(htmltools)| !require(RColorBrewer)) {
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmlwidgets', 'RColorBrewer'))
+}
+
+# Libraries needed
+library(raster)
+library(tools)
+library(rgdal)
+library(gdalUtils)
+library(rworldmap)
+library(cleangeo)
+library(gdata)
+library(leaflet)
+library(htmlwidgets)
+library(RColorBrewer)
+
+# Changes temp dir to location with space, at least 5 GB free
+rasterOptions(tmpdir=&quot;data/temp/&quot;)
+rasterOptions(maxmemory=1e+12)
+
+# Source files
+source('R/summary_data.R')
+source('R/ndvi_annual_mean.R')
+source('R/hazards_sum.R')
+source('R/calc_index.R')
+source('R/normalization.R')
+
+print('---- Ending setup ----')</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -202,13 +229,26 @@ January 2016</p>
 <p>For downloading the necessary datasets, we used two bash scripts called from the main script and a simple download.file function call.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbInByaW50KCctLS0tIFN0YXJ0aW5nIGRvd25sb2FkcyAtLS0tJykiLCIjIERvd25sb2FkcyB0aGUgaGF6YXJkcyBhbmQgUE0yLjUgZGF0YXNldHMgZnJvbSBTRURBQyIsInN5c3RlbSgnQmFzaC8uL3NlZGFjX2hhel9wbTI1LnNoJykiLCIiLCIjIFJ1bnMgdGhlIGJhc2ggc2NyaXB0IHRoYXQgZG93bmxvYWRzIHRoZSBtb250aGx5IE1PRElTIE5EVkkgZGF0YSIsInN5c3RlbSgnQmFzaC8uL21vZGlzX25kdmkuc2gnKSIsIiIsIiMgRG93bmxvYWQgR0VDT04gZGF0YSB4bHMiLCJkb3dubG9hZC5maWxlKCdodHRwOi8vZ2Vjb24ueWFsZS5lZHUvc2l0ZXMvZGVmYXVsdC9maWxlcy9HZWNvbjQwX3Bvc3RfZmluYWwueGxzJywgJ2RhdGEvR2Vjb240MF9wb3N0X2ZpbmFsLnhscycpIiwiIiwicHJpbnQoJy0tLS0gRW5kaW5nIGRvd25sb2FkcyAtLS0tJykiXX0= -->
+<pre class="r"><code>print('---- Starting downloads ----')
+# Downloads the hazards and PM2.5 datasets from SEDAC
+system('Bash/./sedac_haz_pm25.sh')
+
+# Runs the bash script that downloads the monthly MODIS NDVI data
+system('Bash/./modis_ndvi.sh')
+
+# Download GECON data xls
+download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/Gecon40_post_final.xls')
+
+print('---- Ending downloads ----')</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>For the porpuses of the SEDAC data downloaded we used the following wget command.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjpbIiMgRXhhbXBsZSBmb3IgRHJvdWdodCBIYXphcmQgZGF0YXNldCIsIndnZXQgLUwgLS11c2VyPXJvZHJpZ29hbG1laWRhOTQgLS1wYXNzd29yZD0qUm1BMjAwNzE5OTQqKioqIC0tbG9hZC1jb29raWVzIH4vLmNvb2tpZXMgLS1zYXZlLWNvb2tpZXMgfi8uY29va2llcyAtLW5vLWRpcmVjdG9yaWVzIGh0dHA6Ly9zZWRhYy5jaWVzaW4uY29sdW1iaWEuZWR1L2Rvd25sb2Fkcy9kYXRhL25kaC9uZGgtZHJvdWdodC1oYXphcmQtZnJlcXVlbmN5LWRpc3RyaWJ1dGlvbi9nZGRyZy56aXAiLCIjIFVuemlwcyBhbmQgcGxhY2VzIGZpbGVzIGluIHRoZSByaWdodCBwbGFjZSIsInVuemlwIGdkZHJnLnppcCAtZCAuLi9kYXRhLyIsInJtIGdkZHJnLnppcCIsIm12IC4uL2RhdGEvZ2RkcmcvZ2RkcmcuYXNjIC4uL2RhdGEvaGF6X2Ryb3VnaHQuYXNjIiwibXYgLi4vZGF0YS9nZGRyZy9nZGRyZy5wcmogLi4vZGF0YS9oYXpfZHJvdWdodC5wcmoiLCJybSAtciAuLi9kYXRhL2dkZHJnIl19 -->
-<pre class="r"><code># Example for Drought Hazard dataset
+<!-- rnb-source-begin eyJkYXRhIjoiIyBFeGFtcGxlIGZvciBEcm91Z2h0IEhhemFyZCBkYXRhc2V0XG53Z2V0IC1MIC0tdXNlcj1yb2RyaWdvYWxtZWlkYTk0IC0tcGFzc3dvcmQ9KlJtQTIwMDcxOTk0KioqKiAtLWxvYWQtY29va2llcyB+Ly5jb29raWVzIC0tc2F2ZS1jb29raWVzIH4vLmNvb2tpZXMgLS1uby1kaXJlY3RvcmllcyBodHRwOi8vc2VkYWMuY2llc2luLmNvbHVtYmlhLmVkdS9kb3dubG9hZHMvZGF0YS9uZGgvbmRoLWRyb3VnaHQtaGF6YXJkLWZyZXF1ZW5jeS1kaXN0cmlidXRpb24vZ2RkcmcuemlwXG4jIFVuemlwcyBhbmQgcGxhY2VzIGZpbGVzIGluIHRoZSByaWdodCBwbGFjZVxudW56aXAgZ2RkcmcuemlwIC1kIC4uL2RhdGEvXG5ybSBnZGRyZy56aXBcbm12IC4uL2RhdGEvZ2RkcmcvZ2RkcmcuYXNjIC4uL2RhdGEvaGF6X2Ryb3VnaHQuYXNjXG5tdiAuLi9kYXRhL2dkZHJnL2dkZHJnLnByaiAuLi9kYXRhL2hhel9kcm91Z2h0LnByalxucm0gLXIgLi4vZGF0YS9nZGRyZyJ9 -->
+<pre class="bash"><code># Example for Drought Hazard dataset
 wget -L --user=rodrigoalmeida94 --password=*RmA20071994**** --load-cookies ~/.cookies --save-cookies ~/.cookies --no-directories http://sedac.ciesin.columbia.edu/downloads/data/ndh/ndh-drought-hazard-frequency-distribution/gddrg.zip
 # Unzips and places files in the right place
 unzip gddrg.zip -d ../data/
@@ -222,8 +262,8 @@ rm -r ../data/gddrg</code></pre>
 <p>For the MODIS NDVI product, we made a for loop that goes through every folder in the DAAC for 2016 and downloads the respective file (0.05 degrees resolution).</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjpbImZvciBpIGluIDAxIDAyIDAzIDA0IDA1IDA2IDA3IDA4IDA5IDEwIDExIDEyOyIsImRvIHdnZXQgLUwgLS11c2VyPXJvZHJpZ29hbG1laWRhOTQgLS1wYXNzd29yZD0qKioqIC0tbG9hZC1jb29raWVzIH4vLmNvb2tpZXMgLS1zYXZlLWNvb2tpZXMgfi8uY29va2llcyAtciAtLW5vLXBhcmVudCAtQSAnKi5oZGYnIC0tbm8tZGlyZWN0b3JpZXMgLVAgLi4vZGF0YS9odHRwOi8vZTRmdGwwMS5jci51c2dzLmdvdi9NT0xUL01PRDEzQzIuMDA2LzIwMTYuJGkuMDEvIiwiZG9uZSJdfQ== -->
-<pre class="r"><code>for i in 01 02 03 04 05 06 07 08 09 10 11 12;
+<!-- rnb-source-begin eyJkYXRhIjoiZm9yIGkgaW4gMDEgMDIgMDMgMDQgMDUgMDYgMDcgMDggMDkgMTAgMTEgMTI7XG5kbyB3Z2V0IC1MIC0tdXNlcj1yb2RyaWdvYWxtZWlkYTk0IC0tcGFzc3dvcmQ9KioqKiAtLWxvYWQtY29va2llcyB+Ly5jb29raWVzIC0tc2F2ZS1jb29raWVzIH4vLmNvb2tpZXMgLXIgLS1uby1wYXJlbnQgLUEgJyouaGRmJyAtLW5vLWRpcmVjdG9yaWVzIC1QIC4uL2RhdGEvaHR0cDovL2U0ZnRsMDEuY3IudXNncy5nb3YvTU9MVC9NT0QxM0MyLjAwNi8yMDE2LiRpLjAxL1xuZG9uZSJ9 -->
+<pre class="bash"><code>for i in 01 02 03 04 05 06 07 08 09 10 11 12;
 do wget -L --user=rodrigoalmeida94 --password=**** --load-cookies ~/.cookies --save-cookies ~/.cookies -r --no-parent -A '*.hdf' --no-directories -P ../data/http://e4ftl01.cr.usgs.gov/MOLT/MOD13C2.006/2016.$i.01/
 done</code></pre>
 <!-- rnb-source-end -->
@@ -239,19 +279,68 @@ done</code></pre>
 3. Loading the PM2.5 dataset into memory; 4. Creating the GECON data with the XLS file into two rasters GECON PPP and GECON MER.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxua25pdHI6OnJlYWRfY2h1bmsoJ1IvbmR2aV9hbm51YWxfbWVhbi5SJylcbmBgYCJ9 -->
-<pre class="r"><code>knitr::read_chunk('R/ndvi_annual_mean.R')</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjpbInByaW50KFwiLS0tLSBTdGFydGluZyByZWFkLWZpbGVzIC0tLS1cIikiLCIjIExvYWRzIHRoZSBoYXphcmRzIGRhdGFzZXQgaW50byBtZW1vcnkiLCJoYXphcmRzX2ZpbGVzIDwtIGxpc3QuZmlsZXMoXCJkYXRhXCIsIHBhdHRlcm4gPSBcImhhel8/LipcXFxcLmFzY1wiLCBmdWxsLm5hbWVzID0gVCkiLCJmb3IgKGhheiBpbiBoYXphcmRzX2ZpbGVzKSB7XG4gICAgYXNzaWduKGJhc2VuYW1lKGZpbGVfcGF0aF9zYW5zX2V4dChoYXopKSwgcmFzdGVyKGhheikpXG4gICAgYSA8LSBnZXQoYmFzZW5hbWUoZmlsZV9wYXRoX3NhbnNfZXh0KGhheikpKVxuICAgIGFAZGF0YUBuYW1lcyA8LSBiYXNlbmFtZShmaWxlX3BhdGhfc2Fuc19leHQoaGF6KSlcbn0iLCJybShoYXosIGhhemFyZHNfZmlsZXMsIGEpIiwiIiwiIyBMb2FkcyBORFZJIG1vbnRobHkgZGF0YXNlc3QgaW50byBtZW1vcnkiLCJuZHZpX2ZpbGVzIDwtIGxpc3QuZmlsZXMoXCJkYXRhXCIsIHBhdHRlcm4gPSBcIk1PRDEzQzIqXCIsIGZ1bGwubmFtZXMgPSBUKSIsIm5kdmkubW9udGhzIDwtIGMoXCIwMV8yMDE2XCIsIFwiMDJfMjAxNlwiLCBcIjAzXzIwMTZcIiwgXCIwNF8yMDE2XCIsIFwiMDVfMjAxNlwiLCBcIjA2XzIwMTZcIiwgXG4gICAgXCIwN18yMDE2XCIsIFwiMDhfMjAxNlwiLCBcIjA5XzIwMTZcIiwgXCIxMF8yMDE2XCIsIFwiMTFfMjAxNlwiLCBcIjEyXzIwMTZcIikiLCJuZHZpIDwtIHZlY3RvcihcImxpc3RcIiwgbGVuZ3RoKG5kdmkubW9udGhzKSkiLCJuZHZpX3JlbGlhYmlsaXR5IDwtIHZlY3RvcihcImxpc3RcIiwgbGVuZ3RoKG5kdmkubW9udGhzKSkiLCJuYW1lcyhuZHZpKSA8LSBuZHZpLm1vbnRocyIsIm5hbWVzKG5kdmlfcmVsaWFiaWxpdHkpIDwtIG5kdmkubW9udGhzIiwiZm9yIChpIGluIDE6MTIpIHtcbiAgICAjIE5EVkkgaXMgc3ViZGF0YXNldCAxXG4gICAgbmR2aVtpXSA8LSByYXN0ZXIoZ2V0X3N1YmRhdGFzZXRzKG5kdmlfZmlsZXNbaV0pWzFdKVxuICAgIG5kdmlbW2ldXUBkYXRhQG5hbWVzIDwtIHBhc3RlMChcIk5EVklcIiwgbmR2aS5tb250aHNbaV0pXG4gICAgIyBSZWxpYWJpbGl0eSBpcyBzdWJkYXRhc2V0IDEzICgwLCAwIGlzIGdvb2QgLTQpXG4gICAgbmR2aV9yZWxpYWJpbGl0eVtpXSA8LSByYXN0ZXIoZ2V0X3N1YmRhdGFzZXRzKG5kdmlfZmlsZXNbaV0pWzEzXSlcbiAgICBuZHZpX3JlbGlhYmlsaXR5W1tpXV1AZGF0YUBuYW1lcyA8LSBwYXN0ZTAoXCJORFZJX3JlbGlhYmlsaXR5XCIsIG5kdmkubW9udGhzW2ldKVxufSIsInJtKG5kdmlfZmlsZXMsIG5kdmkubW9udGhzLCBpKSIsIiIsIiMgQ2xlYW5zIGRhdGEgYWNjb3JkaW5nIHRvIHJlbGlhYmlsaXR5LCBjYWxjdWxhdGVzIHRoZSBhbm51YWwgbWVhbiIsIm5kdmlfbWVhbiA8LSBuZHZpX2FubnVhbF9tZWFuKG5kdmksIG5kdmlfcmVsaWFiaWxpdHkpIiwicm0obmR2aSwgbmR2aV9yZWxpYWJpbGl0eSkiLCIiLCIjIExvYWRzIHBvbHV0aW9uIGRhdGFzZXQgaW50byBtZW1vcnkiLCJhbm51YWxwbTI1IDwtIHJhc3RlcihcImRhdGEvYW5udWFscG0yNS9hbm51YWxwbTI1LnRpZlwiKSIsIiIsIiMgTG9hZHMgR0VDT04gZGF0YSBmcm9tIFhMUyBmaWxlIiwiZ2Vjb24gPC0gcmVhZC54bHMoXCJkYXRhL0dlY29uNDBfcG9zdF9maW5hbC54bHNcIiwgc2hlZXQgPSAxLCBoZWFkZXIgPSBUKSIsImdlY29uIDwtIGRhdGEuZnJhbWUoZ2Vjb24kTEFULCBnZWNvbiRMT05HSVRVREUsIGdlY29uJFBQUDIwMDVfNDAsIGdlY29uJE1FUjIwMDVfNDApIiwiZ2Vjb24kZ2Vjb24uUFBQMjAwNV80MCA8LSBhcy5udW1lcmljKHBhc3RlKGdlY29uJGdlY29uLlBQUDIwMDVfNDApKSIsImdlY29uJGdlY29uLk1FUjIwMDVfNDAgPC0gYXMubnVtZXJpYyhwYXN0ZShnZWNvbiRnZWNvbi5NRVIyMDA1XzQwKSkiLCJjb29yZGluYXRlcyhnZWNvbikgPC0gfmdlY29uLkxPTkdJVFVERSArIGdlY29uLkxBVCIsImdyaWRkZWQoZ2Vjb24pIDwtIFQiLCJnZWNvbkBwcm9qNHN0cmluZyA8LSBDUlMoXCIrcHJvaj1sb25nbGF0ICtkYXR1bT1XR1M4NCArbm9fZGVmcyArZWxscHM9V0dTODQgK3Rvd2dzODQ9MCwwLDBcIikiLCJnZWNvbl9tZXIgPC0gcmFzdGVyKGdlY29uW1wiZ2Vjb24uTUVSMjAwNV80MFwiXSkiLCJnZWNvbl9wcHAgPC0gcmFzdGVyKGdlY29uW1wiZ2Vjb24uUFBQMjAwNV80MFwiXSkiLCJnZWNvbl9tZXJAZGF0YUBuYW1lcyA8LSBcImdlY29uX21lclwiIiwiZ2Vjb25fcHBwQGRhdGFAbmFtZXMgPC0gXCJnZWNvbl9wcHBcIiIsIndyaXRlUmFzdGVyKGdlY29uX21lciwgXCJkYXRhL2dlY29uX21lci50aWZcIiwgXCJHVGlmZlwiKSIsIndyaXRlUmFzdGVyKGdlY29uX3BwcCwgXCJkYXRhL2dlY29uX3BwcC50aWZcIiwgXCJHVGlmZlwiKSIsInJtKGdlY29uKSIsIiIsInByaW50KFwiLS0tLSBFbmRpbmcgcmVhZC1maWxlcyAtLS0tXCIpIl19 -->
+<pre class="r"><code>print(&quot;---- Starting read-files ----&quot;)
+# Loads the hazards dataset into memory
+hazards_files &lt;- list.files(&quot;data&quot;, pattern = &quot;haz_?.*\\.asc&quot;, full.names = T)
+for (haz in hazards_files) {
+    assign(basename(file_path_sans_ext(haz)), raster(haz))
+    a &lt;- get(basename(file_path_sans_ext(haz)))
+    a@data@names &lt;- basename(file_path_sans_ext(haz))
+}
+rm(haz, hazards_files, a)
+
+# Loads NDVI monthly datasest into memory
+ndvi_files &lt;- list.files(&quot;data&quot;, pattern = &quot;MOD13C2*&quot;, full.names = T)
+ndvi.months &lt;- c(&quot;01_2016&quot;, &quot;02_2016&quot;, &quot;03_2016&quot;, &quot;04_2016&quot;, &quot;05_2016&quot;, &quot;06_2016&quot;, 
+    &quot;07_2016&quot;, &quot;08_2016&quot;, &quot;09_2016&quot;, &quot;10_2016&quot;, &quot;11_2016&quot;, &quot;12_2016&quot;)
+ndvi &lt;- vector(&quot;list&quot;, length(ndvi.months))
+ndvi_reliability &lt;- vector(&quot;list&quot;, length(ndvi.months))
+names(ndvi) &lt;- ndvi.months
+names(ndvi_reliability) &lt;- ndvi.months
+for (i in 1:12) {
+    # NDVI is subdataset 1
+    ndvi[i] &lt;- raster(get_subdatasets(ndvi_files[i])[1])
+    ndvi[[i]]@data@names &lt;- paste0(&quot;NDVI&quot;, ndvi.months[i])
+    # Reliability is subdataset 13 (0, 0 is good -4)
+    ndvi_reliability[i] &lt;- raster(get_subdatasets(ndvi_files[i])[13])
+    ndvi_reliability[[i]]@data@names &lt;- paste0(&quot;NDVI_reliability&quot;, ndvi.months[i])
+}
+rm(ndvi_files, ndvi.months, i)
+
+# Cleans data according to reliability, calculates the annual mean
+ndvi_mean &lt;- ndvi_annual_mean(ndvi, ndvi_reliability)
+rm(ndvi, ndvi_reliability)
+
+# Loads polution dataset into memory
+annualpm25 &lt;- raster(&quot;data/annualpm25/annualpm25.tif&quot;)
+
+# Loads GECON data from XLS file
+gecon &lt;- read.xls(&quot;data/Gecon40_post_final.xls&quot;, sheet = 1, header = T)
+gecon &lt;- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
+gecon$gecon.PPP2005_40 &lt;- as.numeric(paste(gecon$gecon.PPP2005_40))
+gecon$gecon.MER2005_40 &lt;- as.numeric(paste(gecon$gecon.MER2005_40))
+coordinates(gecon) &lt;- ~gecon.LONGITUDE + gecon.LAT
+gridded(gecon) &lt;- T
+gecon@proj4string &lt;- CRS(&quot;+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0&quot;)
+gecon_mer &lt;- raster(gecon[&quot;gecon.MER2005_40&quot;])
+gecon_ppp &lt;- raster(gecon[&quot;gecon.PPP2005_40&quot;])
+gecon_mer@data@names &lt;- &quot;gecon_mer&quot;
+gecon_ppp@data@names &lt;- &quot;gecon_ppp&quot;
+writeRaster(gecon_mer, &quot;data/gecon_mer.tif&quot;, &quot;GTiff&quot;)
+writeRaster(gecon_ppp, &quot;data/gecon_ppp.tif&quot;, &quot;GTiff&quot;)
+rm(gecon)
+
+print(&quot;---- Ending read-files ----&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRHJhZ29uIE1hc3RlciBQcm9qZWN0IgpvdXRwdXQ6CiAgaHRtbF9kb2N1bWVudDogZGVmYXVsdAogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQKLS0tClRoaXMgaXMgdGhlIGZpbmFsIHByb2plY3Qgb2YgdGhlIEdlb3NjcmlwdGluZyBjb3Vyc2UsIHBlcmlvZCAzLCAyMDE2LTIwMTcsIFdhZ2VuaW5nZW4gVW5pdmVyc2l0eS4gIApBdXRob3JzOiBSb2RyaWdvIEFsbWVpZGEgYW5kIFBpbmcgWmhvdSAgCkphbnVhcnkgMjAxNiAgCiAgCl9fTWFpbiBnb2FsOl9fIEZpbmQgdGhlIGJlc3QgY291bnRyeS9yZWdpb24gb24gZWFydGggYWNjb3JkaW5nIHRvIGEgbGl2aW5nIHF1YWxpdHkgaW5kZXggYmFzZWQgb246ICAgCjEuIEhhemFyZCBmcmVxdWVuY3kgYW5kIGRpc3RyaWJ1dGlvbjsgIAoyLiBBaXIgcG9sbHV0aW9uOyAgCjMuIEdEUDsgIAo0LiBBdmVyYWdlIHllYXIgTkRWSS4gIAogIApfX1dhcm5pbmc6X18gUnVubmluZyB0aGUgZW50aXJlIHNjcmlwdCB0YWtlcyBhYm91dCAyIGhvdXJzIG9mIGNvbXB1dGF0aW9uIHRpbWUgaW4gdGhlIDIgY29yZSB2aXJ0dWFsIG1hY2hpbmUgd2UgdXNlZC4gV2UgaGlnaGx5IHJlY29tbWVuZCB1c2luZyB0aGUgdGVybWluYWwuCgojIyBTZXR1cCAgCmBgYHtyfQprbml0cjo6cmVhZF9jaHVuaygnbWFpbi5SJykKYGBgCk91ciBwcm9qZWN0IGNvcmUgaXMgbG9jYXRlZCBhdCBtYWluLlIgZmlsZS4gRmlyc3QsIHdlIHN0YXJ0IGJ5IHNldHRpbmcgc29tZSBlbnZpcm9ubWVudCBzZXR0aW5ncywgaW5jbHVkaW5nIGhlIGluc3RhbGxhdGlvbiBvZiBuZWNlc3NhcnkgbGlicmFyaWVzIGFuZCB0aGUgaW1wb3J0IG9mIHN1Y2ggbGlicmFyaWVzLiBXZSBhbHNvIHNvdXJjZSB0aGUgc3ViLXNjcmlwdHMgaW4gdGhlIHNldHVwIHNlY3Rpb24uICAKYGBge3Igc2V0dXAsIGV2YWw9RkFMU0V9CmBgYAojIyBEb3dubG9hZHMgIApGb3IgZG93bmxvYWRpbmcgdGhlIG5lY2Vzc2FyeSBkYXRhc2V0cywgd2UgdXNlZCB0d28gYmFzaCBzY3JpcHRzIGNhbGxlZCBmcm9tIHRoZSBtYWluIHNjcmlwdCBhbmQgYSBzaW1wbGUgZG93bmxvYWQuZmlsZSBmdW5jdGlvbiBjYWxsLiAgIApgYGB7ciBkb3dubG9hZHMsIGV2YWwgPSBGQUxTRX0KYGBgCkZvciB0aGUgcG9ycHVzZXMgb2YgdGhlIFNFREFDIGRhdGEgZG93bmxvYWRlZCB3ZSB1c2VkIHRoZSBmb2xsb3dpbmcgd2dldCBjb21tYW5kLgpgYGB7YmFzaCwgZXZhbCA9IEZBTFNFfQojIEV4YW1wbGUgZm9yIERyb3VnaHQgSGF6YXJkIGRhdGFzZXQKd2dldCAtTCAtLXVzZXI9cm9kcmlnb2FsbWVpZGE5NCAtLXBhc3N3b3JkPSpSbUEyMDA3MTk5NCoqKiogLS1sb2FkLWNvb2tpZXMgfi8uY29va2llcyAtLXNhdmUtY29va2llcyB+Ly5jb29raWVzIC0tbm8tZGlyZWN0b3JpZXMgaHR0cDovL3NlZGFjLmNpZXNpbi5jb2x1bWJpYS5lZHUvZG93bmxvYWRzL2RhdGEvbmRoL25kaC1kcm91Z2h0LWhhemFyZC1mcmVxdWVuY3ktZGlzdHJpYnV0aW9uL2dkZHJnLnppcAojIFVuemlwcyBhbmQgcGxhY2VzIGZpbGVzIGluIHRoZSByaWdodCBwbGFjZQp1bnppcCBnZGRyZy56aXAgLWQgLi4vZGF0YS8Kcm0gZ2RkcmcuemlwCm12IC4uL2RhdGEvZ2RkcmcvZ2RkcmcuYXNjIC4uL2RhdGEvaGF6X2Ryb3VnaHQuYXNjCm12IC4uL2RhdGEvZ2RkcmcvZ2RkcmcucHJqIC4uL2RhdGEvaGF6X2Ryb3VnaHQucHJqCnJtIC1yIC4uL2RhdGEvZ2RkcmcKYGBgCkZvciB0aGUgTU9ESVMgTkRWSSBwcm9kdWN0LCB3ZSBtYWRlIGEgZm9yIGxvb3AgdGhhdCBnb2VzIHRocm91Z2ggZXZlcnkgZm9sZGVyIGluIHRoZSBEQUFDIGZvciAyMDE2IGFuZCBkb3dubG9hZHMgdGhlIHJlc3BlY3RpdmUgZmlsZSAoMC4wNSBkZWdyZWVzIHJlc29sdXRpb24pLgpgYGB7YmFzaCwgZXZhbCA9IEZBTFNFfQpmb3IgaSBpbiAwMSAwMiAwMyAwNCAwNSAwNiAwNyAwOCAwOSAxMCAxMSAxMjsKZG8gd2dldCAtTCAtLXVzZXI9cm9kcmlnb2FsbWVpZGE5NCAtLXBhc3N3b3JkPSoqKiogLS1sb2FkLWNvb2tpZXMgfi8uY29va2llcyAtLXNhdmUtY29va2llcyB+Ly5jb29raWVzIC1yIC0tbm8tcGFyZW50IC1BICcqLmhkZicgLS1uby1kaXJlY3RvcmllcyAtUCAuLi9kYXRhL2h0dHA6Ly9lNGZ0bDAxLmNyLnVzZ3MuZ292L01PTFQvTU9EMTNDMi4wMDYvMjAxNi4kaS4wMS8KZG9uZQpgYGAKVGhlIEdFQ09OIGRhdGFzZXRzIHdlcmUgYXZhaWxhYmxlIGluIFNFREFDIGFzIHdlbGwsIGJ1dCB1bmZvcnR1bmF0ZWx5IHRoZSBkYXRhIGhhZCBzb21lIGlzc3Vlcywgc28gd2UgZGVjaWRlZCB0byBtYWtlIHRoZSByYXN0ZXIgbGF5ZXIgb3Vyc2VsZnMgZnJvbSB0aGUgWExTIGZpbGUgcHJvdmlkZWQgaW4gdGhlIHByb2plY3Qgd2Vic2l0ZS4gIAoKIyMgUmVhZCBmaWxlcwpUaGUgcHJvY2VzcyBvZiByZWFkaW5nIHRoZSBmaWxlcyBpbnRvIG1lbW9yeSBpcyBxdWl0ZSBzdHJhaWdoZm9yd2FyZDogIAoxLiBMb2FkaW5nIGFsbCB0aGUgaGF6YXJkIGZpbGVzIHdpdGggdGhlIGNvcnJlY3QgbmFtZSB1c2luZyBhIGZvciBsb29wOyAgCjIuIExvYWRpbmcgdGhlIE5EVkkgbW9udGhseSBkYXRhLCBhbmQgcGFzc2luZyBpdCB0byB0aGUgYW5udWFsX21lYW4gZnVuY3Rpb24sIHRoYXQgcmV0dXJucyB0aGUgYW5udWFsIG1lYW47ICAKMy4gTG9hZGluZyB0aGUgUE0yLjUgZGF0YXNldCBpbnRvIG1lbW9yeTsgCjQuIENyZWF0aW5nIHRoZSBHRUNPTiBkYXRhIHdpdGggdGhlIFhMUyBmaWxlIGludG8gdHdvIHJhc3RlcnMgR0VDT04gUFBQIGFuZCBHRUNPTiBNRVIuICAKYGBge3IgcmVhZC1maWxlcywgZXZhbD1GQUxTRSwgdGlkeT1UUlVFfQoKYGBgCgpgYGB7cn0Ka25pdHI6OnJlYWRfY2h1bmsoJ1IvbmR2aV9hbm51YWxfbWVhbi5SJykKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRHJhZ29uIE1hc3RlciBQcm9qZWN0IgpvdXRwdXQ6CiAgaHRtbF9ub3RlYm9vazogZGVmYXVsdAogIGh0bWxfZG9jdW1lbnQ6IGRlZmF1bHQKLS0tClRoaXMgaXMgdGhlIGZpbmFsIHByb2plY3Qgb2YgdGhlIEdlb3NjcmlwdGluZyBjb3Vyc2UsIHBlcmlvZCAzLCAyMDE2LTIwMTcsIFdhZ2VuaW5nZW4gVW5pdmVyc2l0eS4gIApBdXRob3JzOiBSb2RyaWdvIEFsbWVpZGEgYW5kIFBpbmcgWmhvdSAgCkphbnVhcnkgMjAxNiAgCiAgCl9fTWFpbiBnb2FsOl9fIEZpbmQgdGhlIGJlc3QgY291bnRyeS9yZWdpb24gb24gZWFydGggYWNjb3JkaW5nIHRvIGEgbGl2aW5nIHF1YWxpdHkgaW5kZXggYmFzZWQgb246ICAgCjEuIEhhemFyZCBmcmVxdWVuY3kgYW5kIGRpc3RyaWJ1dGlvbjsgIAoyLiBBaXIgcG9sbHV0aW9uOyAgCjMuIEdEUDsgIAo0LiBBdmVyYWdlIHllYXIgTkRWSS4gIAogIApfX1dhcm5pbmc6X18gUnVubmluZyB0aGUgZW50aXJlIHNjcmlwdCB0YWtlcyBhYm91dCAyIGhvdXJzIG9mIGNvbXB1dGF0aW9uIHRpbWUgaW4gdGhlIDIgY29yZSB2aXJ0dWFsIG1hY2hpbmUgd2UgdXNlZC4gV2UgaGlnaGx5IHJlY29tbWVuZCB1c2luZyB0aGUgdGVybWluYWwuCgojIyBTZXR1cCAgCmBgYHtyLCBpbmNsdWRlID0gRkFMU0V9CmtuaXRyOjpyZWFkX2NodW5rKCdtYWluLlInKQpgYGAKT3VyIHByb2plY3QgY29yZSBpcyBsb2NhdGVkIGF0IG1haW4uUiBmaWxlLiBGaXJzdCwgd2Ugc3RhcnQgYnkgc2V0dGluZyBzb21lIGVudmlyb25tZW50IHNldHRpbmdzLCBpbmNsdWRpbmcgaGUgaW5zdGFsbGF0aW9uIG9mIG5lY2Vzc2FyeSBsaWJyYXJpZXMgYW5kIHRoZSBpbXBvcnQgb2Ygc3VjaCBsaWJyYXJpZXMuIFdlIGFsc28gc291cmNlIHRoZSBzdWItc2NyaXB0cyBpbiB0aGUgc2V0dXAgc2VjdGlvbi4gIApgYGB7ciBzZXR1cCwgZXZhbD1GQUxTRX0KYGBgCiMjIERvd25sb2FkcyAgCkZvciBkb3dubG9hZGluZyB0aGUgbmVjZXNzYXJ5IGRhdGFzZXRzLCB3ZSB1c2VkIHR3byBiYXNoIHNjcmlwdHMgY2FsbGVkIGZyb20gdGhlIG1haW4gc2NyaXB0IGFuZCBhIHNpbXBsZSBkb3dubG9hZC5maWxlIGZ1bmN0aW9uIGNhbGwuICAgCmBgYHtyIGRvd25sb2FkcywgZXZhbCA9IEZBTFNFfQpgYGAKRm9yIHRoZSBwb3JwdXNlcyBvZiB0aGUgU0VEQUMgZGF0YSBkb3dubG9hZGVkIHdlIHVzZWQgdGhlIGZvbGxvd2luZyB3Z2V0IGNvbW1hbmQuCmBgYHtiYXNoLCBldmFsID0gRkFMU0V9CiMgRXhhbXBsZSBmb3IgRHJvdWdodCBIYXphcmQgZGF0YXNldAp3Z2V0IC1MIC0tdXNlcj1yb2RyaWdvYWxtZWlkYTk0IC0tcGFzc3dvcmQ9KlJtQTIwMDcxOTk0KioqKiAtLWxvYWQtY29va2llcyB+Ly5jb29raWVzIC0tc2F2ZS1jb29raWVzIH4vLmNvb2tpZXMgLS1uby1kaXJlY3RvcmllcyBodHRwOi8vc2VkYWMuY2llc2luLmNvbHVtYmlhLmVkdS9kb3dubG9hZHMvZGF0YS9uZGgvbmRoLWRyb3VnaHQtaGF6YXJkLWZyZXF1ZW5jeS1kaXN0cmlidXRpb24vZ2RkcmcuemlwCiMgVW56aXBzIGFuZCBwbGFjZXMgZmlsZXMgaW4gdGhlIHJpZ2h0IHBsYWNlCnVuemlwIGdkZHJnLnppcCAtZCAuLi9kYXRhLwpybSBnZGRyZy56aXAKbXYgLi4vZGF0YS9nZGRyZy9nZGRyZy5hc2MgLi4vZGF0YS9oYXpfZHJvdWdodC5hc2MKbXYgLi4vZGF0YS9nZGRyZy9nZGRyZy5wcmogLi4vZGF0YS9oYXpfZHJvdWdodC5wcmoKcm0gLXIgLi4vZGF0YS9nZGRyZwpgYGAKRm9yIHRoZSBNT0RJUyBORFZJIHByb2R1Y3QsIHdlIG1hZGUgYSBmb3IgbG9vcCB0aGF0IGdvZXMgdGhyb3VnaCBldmVyeSBmb2xkZXIgaW4gdGhlIERBQUMgZm9yIDIwMTYgYW5kIGRvd25sb2FkcyB0aGUgcmVzcGVjdGl2ZSBmaWxlICgwLjA1IGRlZ3JlZXMgcmVzb2x1dGlvbikuCmBgYHtiYXNoLCBldmFsID0gRkFMU0V9CmZvciBpIGluIDAxIDAyIDAzIDA0IDA1IDA2IDA3IDA4IDA5IDEwIDExIDEyOwpkbyB3Z2V0IC1MIC0tdXNlcj1yb2RyaWdvYWxtZWlkYTk0IC0tcGFzc3dvcmQ9KioqKiAtLWxvYWQtY29va2llcyB+Ly5jb29raWVzIC0tc2F2ZS1jb29raWVzIH4vLmNvb2tpZXMgLXIgLS1uby1wYXJlbnQgLUEgJyouaGRmJyAtLW5vLWRpcmVjdG9yaWVzIC1QIC4uL2RhdGEvaHR0cDovL2U0ZnRsMDEuY3IudXNncy5nb3YvTU9MVC9NT0QxM0MyLjAwNi8yMDE2LiRpLjAxLwpkb25lCmBgYApUaGUgR0VDT04gZGF0YXNldHMgd2VyZSBhdmFpbGFibGUgaW4gU0VEQUMgYXMgd2VsbCwgYnV0IHVuZm9ydHVuYXRlbHkgdGhlIGRhdGEgaGFkIHNvbWUgaXNzdWVzLCBzbyB3ZSBkZWNpZGVkIHRvIG1ha2UgdGhlIHJhc3RlciBsYXllciBvdXJzZWxmcyBmcm9tIHRoZSBYTFMgZmlsZSBwcm92aWRlZCBpbiB0aGUgcHJvamVjdCB3ZWJzaXRlLiAgCgojIyBSZWFkIGZpbGVzClRoZSBwcm9jZXNzIG9mIHJlYWRpbmcgdGhlIGZpbGVzIGludG8gbWVtb3J5IGlzIHF1aXRlIHN0cmFpZ2hmb3J3YXJkOiAgCjEuIExvYWRpbmcgYWxsIHRoZSBoYXphcmQgZmlsZXMgd2l0aCB0aGUgY29ycmVjdCBuYW1lIHVzaW5nIGEgZm9yIGxvb3A7ICAKMi4gTG9hZGluZyB0aGUgTkRWSSBtb250aGx5IGRhdGEsIGFuZCBwYXNzaW5nIGl0IHRvIHRoZSBhbm51YWxfbWVhbiBmdW5jdGlvbiwgdGhhdCByZXR1cm5zIHRoZSBhbm51YWwgbWVhbjsgIAozLiBMb2FkaW5nIHRoZSBQTTIuNSBkYXRhc2V0IGludG8gbWVtb3J5OyAKNC4gQ3JlYXRpbmcgdGhlIEdFQ09OIGRhdGEgd2l0aCB0aGUgWExTIGZpbGUgaW50byB0d28gcmFzdGVycyBHRUNPTiBQUFAgYW5kIEdFQ09OIE1FUi4gIApgYGB7ciByZWFkLWZpbGVzLCBldmFsPUZBTFNFLCB0aWR5PVRSVUV9CgpgYGAKCmBgYHtyLCBpbmNsdWRlPUZBTFNFfQprbml0cjo6cmVhZF9jaHVuaygnUi9uZHZpX2FubnVhbF9tZWFuLlInKQpgYGAKCgo=</div>
 
 
 
