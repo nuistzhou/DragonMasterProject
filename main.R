@@ -178,31 +178,26 @@ r_annualpm25 <- normalization(r_annualpm25)
 index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
 index10101010 <- index10101010*100
 writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
-rm(index10101010)
 
 # Index - Greenest
 index10050505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 0.5, 0.5, 0.5,simpleWorld)
 index10050505 <- index10050505*100
 writeRaster(index10050505, 'data/index10050505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
-rm(index10050505)
 
 # Index - Richest
 index05100505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 1, 0.5, 0.5,simpleWorld)
 index05100505 <- index05100505*100
 writeRaster(index05100505, 'data/index05100505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
-rm(index05100505)
 
 # Index - Less hazards
 index05051005 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 1, 0.5,simpleWorld)
 index05051005 <- index05051005*100
 writeRaster(index05051005, 'data/index05051005.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
-rm(index05051005)
 
 # Index - Less polution
 index05050510 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 0.5, 1,simpleWorld)
 index05050510 <- index05050510*100
 writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
-rm(index05050510)
 print('---- Ending index-calculation ----')
 
 # ---- visualization ----
@@ -211,10 +206,15 @@ source('R/vis.R')
 # ---- top-countries ----
 # Calculate Matrix of Top Countries
 source('R/matrix_top.R')
-ras_world <- rasterize(world,Index,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
-matrix_top(index,world,ras_world,5)
+ras_world <- rasterize(world,r_ndvi_mean,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
+same <- matrix_top(index10101010,world,ras_world,10)
+greenest <- matrix_top(index10050505,world,ras_world,10)
+richest <- matrix_top(index05100505,world,ras_world,10)
+less_hazards <- matrix_top(index05051005,world,ras_world,10)
+less_polution <- matrix_top(index05050510,world,ras_world,10)
 
-
-
-
-
+index10101010 <- raster('data/index10101010.tif')
+index10050505 <- raster('data/index10050505.tif')
+index05100505 <- raster('data/index05100505.tif')
+index05051005 <- raster('data/index05051005.tif')
+index05050510 <- raster('data/index05050510.tif')
