@@ -16,7 +16,7 @@ __Main goal:__ Find the best country/region on earth according to a living quali
   
 __Warning:__ Running the entire script takes about 2 hours of computation time in the 2 core virtual machine we used. We highly recommend using the terminal.
 
-## Setup  
+##Setup  
 ```{r, include = FALSE}
 knitr::read_chunk('main.R')
 knitr::read_chunk('R/ndvi_annual_mean.R')
@@ -29,12 +29,12 @@ knitr::read_chunk('R/vis.R')
 Our project core is located at main.R file. First, we start by setting some environment settings, including he installation of necessary libraries and the import of such libraries. We also source the sub-scripts in the setup section.  
 ```{r setup, eval=FALSE}
 ```
-## Downloads  
+##Downloads  
 For downloading the necessary datasets, we used two bash scripts called from the main script and a simple download.file function call.   
 ```{r downloads, eval = FALSE}
 ```
 For the porpuses of the SEDAC data downloaded we used the following wget command.
-```{bash, eval = FALSE}
+```{bash bash1, eval=FALSE}
 # Example for Drought Hazard dataset
 wget -L --user=rodrigoalmeida94 --password=*RmA20071994**** --load-cookies ~/.cookies --save-cookies ~/.cookies --no-directories http://sedac.ciesin.columbia.edu/downloads/data/ndh/ndh-drought-hazard-frequency-distribution/gddrg.zip
 # Unzips and places files in the right place
@@ -45,20 +45,20 @@ mv ../data/gddrg/gddrg.prj ../data/haz_drought.prj
 rm -r ../data/gddrg
 ```
 For the MODIS NDVI product, we made a for loop that goes through every folder in the DAAC for 2016 and downloads the respective file (0.05 degrees resolution).
-```{bash, eval = FALSE}
+```{bash bash2, eval=FALSE}
 for i in 01 02 03 04 05 06 07 08 09 10 11 12;
 do wget -L --user=rodrigoalmeida94 --password=**** --load-cookies ~/.cookies --save-cookies ~/.cookies -r --no-parent -A '*.hdf' --no-directories -P ../data/http://e4ftl01.cr.usgs.gov/MOLT/MOD13C2.006/2016.$i.01/
 done
 ```
 The GECON datasets were available in SEDAC as well, but unfortunately the data had some issues, so we decided to make the raster layer ourselfs from the XLS file provided in the project website.  
 
-## Read files
+##Read files
 The process of reading the files into memory is quite straighforward:  
 1. Loading all the hazard files with the correct name using a for loop;  
 2. Loading the NDVI monthly data, and passing it to the annual_mean function, that returns the annual mean;  
 3. Loading the PM2.5 dataset into memory; 
 4. Creating the GECON data with the XLS file into two rasters GECON PPP and GECON MER.  
-```{r read-files, eval=FALSE, tidy=TRUE}
+```{r read-files2, eval=FALSE, tidy=TRUE}
 
 ```
 The annual mean function for the NDVI takes the month dataset, cleans the data according to the reliability layer that is provided with the MODIS NDVI product and calculates the mean.  
@@ -67,12 +67,69 @@ The annual mean function for the NDVI takes the month dataset, cleans the data a
 ```
 The creation of the GECON dataset from the XLS file was a bit trickier than expected, since the gridded takes the coordinates as the center of the cell coordinates, and in this case it was the coordinates of the corners of the cell. Because of that it was necessary to add 1 degree to the existing coordinates to correct for that.  
 
-## Files information
+##Files information
 In order to obtain an overview of the downloaded files, we created a function to report all attributes of the data sets in a data frame format.  
 ```{r summary_data, eval=FALSE}
 
 ```
+We call that function from the main and store some important information for the file preprocessing like the maximum resolution and the appropriate CRS.
+```{r files-info, eval = FALSE}
 
+```
+```{r print data, eval=FALSE}
+print(data_summary)
+```
 
+##Files pre-processing
+This part of our script uses the data gathered at with the data summary function to resample and reproject the necessary datasets to the same grid and CRS. This is  time consuming step since we are handling worldwide datasets.
+```{r file-preprocessing, eval = FALSE}
 
+```
+We also read the reprojected files into memory, add some aditional information to the datasets (units) and use the rworldmap library to get a world continental boundary.
+
+##Index calculation
+In order to calculate the index, we decided to use a very simple approach, described by the equation below:  
+$$Living\ Quality\ Index = - H_w * H - PM2.5_w * PM2.5 + NDVI_w * NDVI + GDP_w * GDP$$
+Where:  
+$H$ = $H_{cyclone}+H_{drought}+H_{earthquake}+H_{flood}+H_{landslide}+H_{volcano}$, normalized;  
+$PM2.5$ - the PM2.5 dataset normalized;  
+$NDVI$ - the NDVI annual mean for 2016 normalized;  
+$GDP$ - the GDP per cell, measured in Price Parity, normalized;  
+$H_w,PM2.5_w,NDVI_w,GDP_w$ - the respective weights given to each parameter.  
+The index was calculated with the following function.
+
+```{r calc_index, eval=FALSE}
+
+```
+The hazards component with the following function.
+```{r hazards_sum, eval = FALSE}
+
+```
+
+For the normalization of the datasets between 0 and 1, we used the following function.
+```{r normalization, eval = FALSE}
+
+```
+For a more efficient visualization of the data, we multiplied the resulting index by 100 and saved it into a TIF file with a INT2S data type. In this instance, we have predefined five weights combinations:  
+1. Same weight - $H_w,PM2.5_w,NDVI_w,GDP_w = (1,1,1,1)$;  
+2. Greenest - $H_w,PM2.5_w,NDVI_w,GDP_w = (0.5,0.5,1,0.5)$;  
+3. Richest - $H_w,PM2.5_w,NDVI_w,GDP_w = (0.5,0.5,0.5,1)$;  
+4. Less hazards - $H_w,PM2.5_w,NDVI_w,GDP_w = (1,0.5,0.5,0.5)$;  
+5. Less polution - $H_w,PM2.5_w,NDVI_w,GDP_w = (0.5,1,0.5,0.5)$.
+```{r index-calculation, eval = FALSE}
+
+```
+
+##Visualization
+For visuzalization of the index results we used Leaflet to create an html file that allows the user to select which combination of weights is prefered.
+```{r vis, eval=FALSE}
+
+```
+```{r visualization, eval=FALSE}
+
+```
+
+##Highest and lowest rated countries
+
+##Sources 
 

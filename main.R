@@ -88,8 +88,8 @@ gecon <- read.xls('data/Gecon40_post_final.xls',sheet = 1, header = T)
 gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
 gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
 gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
-gecon$gecon.LAT <- gecon$gecon.LAT +1
-gecon$gecon.LONGITUDE <- gecon$gecon.LONGITUDE + 1
+gecon$gecon.LAT <- gecon$gecon.LAT +0.5
+gecon$gecon.LONGITUDE <- gecon$gecon.LONGITUDE + 0.5
 coordinates(gecon) <- ~gecon.LONGITUDE + gecon.LAT
 gridded(gecon) <- T
 gecon@proj4string <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
