@@ -7,7 +7,7 @@
 print('---- Starting setup ----')
 
 if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)| !require(leaflet)| !require(htmltools)| !require(RColorBrewer)) {
- install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmlwidgets', 'RColorBrewer'))
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmltools', 'RColorBrewer'))
 }
 
 # Libraries needed
@@ -88,8 +88,11 @@ gecon <- read.xls('data/Gecon40_post_final.xls',sheet = 1, header = T)
 gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
 gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
 gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
+<<<<<<< HEAD
 gecon$gecon.LAT <- gecon$gecon.LAT +0.5
 gecon$gecon.LONGITUDE <- gecon$gecon.LONGITUDE + 0.5
+=======
+>>>>>>> origin/master
 coordinates(gecon) <- ~gecon.LONGITUDE + gecon.LAT
 gridded(gecon) <- T
 gecon@proj4string <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
@@ -97,8 +100,8 @@ gecon_mer <- raster(gecon["gecon.MER2005_40"])
 gecon_ppp <- raster(gecon["gecon.PPP2005_40"])
 gecon_mer@data@names <- 'gecon_mer'
 gecon_ppp@data@names <- 'gecon_ppp'
-writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff', overwrite = T)
-writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff', overwrite = T)
+writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff')
+writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff')
 rm(gecon)
 
 print('---- Ending read-files ----')
@@ -130,7 +133,7 @@ rm(data_summary, proj_str, minx,miny)
 # Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
 for(r in to_reproj){
   projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
-  print(paste(r@data@names,'was reprojected!'))
+  print(paste(r,'was reprojected!'))
 }
 rm(r,to_reproj, set_raster)
 
@@ -163,12 +166,14 @@ writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
 haz_comp <- raster('data/haz_comp.tif')
 r_ndvi_mean <- raster('data/r_ndvi_mean.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
+r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_annualpm25 <- raster('data/r_annualpm25.tif')
 
-# Normalizes the data
+# Masks and normalizes the data
 haz_comp <- normalization(haz_comp)
 r_ndvi_mean <- normalization(r_ndvi_mean)
 r_gecon_ppp <- normalization(r_gecon_ppp)
+r_gecon_mer <- normalization(r_gecon_mer)
 r_annualpm25 <- normalization(r_annualpm25)
 
 # Calculates the index, for 5 differente combinations of weights
@@ -205,3 +210,13 @@ print('---- Ending index-calculation ----')
 
 # ---- visualization ----
 source('R/vis.R')
+
+# Calculate Matrix of Top Countries
+source('R/matrix_top.R')
+ras_world <- rasterize(world,Index,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
+matrix_top(index,world,ras_world,5)
+
+
+
+
+
