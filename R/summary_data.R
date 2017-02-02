@@ -1,3 +1,4 @@
+# ---- summary_data ----
 # Summary of data of a raster layer
 
 summary_data <- function(raster_list){
