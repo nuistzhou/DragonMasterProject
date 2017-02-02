@@ -165,18 +165,17 @@ r_ndvi_mean <- raster('data/r_ndvi_mean.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
 r_annualpm25 <- raster('data/r_annualpm25.tif')
 
-# Masks and normalizes the data
+# Normalizes the data
 haz_comp <- normalization(haz_comp)
 r_ndvi_mean <- normalization(r_ndvi_mean)
 r_gecon_ppp <- normalization(r_gecon_ppp)
-r_gecon_mer <- normalization(r_gecon_mer)
 r_annualpm25 <- normalization(r_annualpm25)
 
 # Calculates the index, for 5 differente combinations of weights
 # Index - Same weight to all
 index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
 index10101010 <- index10101010*100
-writeRaster(index10101010, 'data/index10101010_test.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
 rm(index10101010)
 
 # Index - Greenest

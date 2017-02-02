@@ -1,8 +1,8 @@
 ---
 title: "Dragon Master Project"
 output:
-  html_notebook: default
   html_document: default
+  html_notebook: default
 ---
 This is the final project of the Geoscripting course, period 3, 2016-2017, Wageningen University.  
 Authors: Rodrigo Almeida and Ping Zhou  
@@ -61,6 +61,18 @@ The process of reading the files into memory is quite straighforward:
 ```{r read-files, eval=FALSE, tidy=TRUE}
 
 ```
+The annual mean function for the NDVI takes the month dataset, cleans the data according to the reliability layer that is provided with the MODIS NDVI product and calculates the mean.  
+```{r ndvi_annual_mean, eval=FALSE, tidy=TRUE}
+
+```
+The creation of the GECON dataset from the XLS file was a bit trickier than expected, since the gridded takes the coordinates as the center of the cell coordinates, and in this case it was the coordinates of the corners of the cell. Because of that it was necessary to add 1 degree to the existing coordinates to correct for that.  
+
+## Files information
+In order to obtain an overview of the downloaded files, we created a function to report all attributes of the data sets in a data frame format.  
+```{r summary_data, eval=FALSE}
+
+```
+
 
 
 
