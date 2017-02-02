@@ -19,7 +19,7 @@ library(rworldmap)
 library(cleangeo)
 library(gdata)
 library(leaflet)
-library(htmltools)
+library(htmlwidgets)
 library(RColorBrewer)
 
 # Changes temp dir to location with space, at least 5 GB free
@@ -205,3 +205,11 @@ print('---- Ending index-calculation ----')
 
 # ---- visualization ----
 source('R/vis.R')
+
+# Calculate Matrix of Top Countries
+rasterize(world,greenness_10,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
+
+
+
+
+
