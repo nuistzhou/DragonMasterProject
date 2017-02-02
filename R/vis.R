@@ -1,3 +1,4 @@
+# ---- vis ----
 # Creates the html file for vizualition of results
 col_pal <- brewer.pal(10, "RdBu")
 mymap <-  leaflet() %>%

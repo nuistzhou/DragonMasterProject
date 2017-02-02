@@ -1,3 +1,4 @@
+# ---- hazards_sum ----
 # Calculate hazards index
 hazards_sum <- function(cyclone,drought,earthquake,flood,landslide,volcano){
   # Calculate the sum of 6 different hazards

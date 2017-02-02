@@ -1,3 +1,4 @@
+# ---- ndvi_annual_mean ----
 # Calculate annual mean NDVI
 ndvi_annual_mean <- function(ndvi_data, ndvi_reliability) {
   # Select good quality ndvi data based on the data realibility

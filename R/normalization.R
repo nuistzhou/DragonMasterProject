@@ -1,4 +1,5 @@
-# Normalization object
+# ---- normalization ----
+# Normalization function
 normalization <- function(raster) {
   min <- minValue(raster)
   max <- maxValue(raster)
