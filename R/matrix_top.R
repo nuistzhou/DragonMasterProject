@@ -14,6 +14,6 @@ matrix_top <- function(ras_index,world,ras_world,top_num) {
 
   # Merge zonal stastics matrix and country information matrix based on country code
   zonal_index <- merge(zonal_index,df_countries,by.x='zone',by.y='code')
-  zonal_index <- zonal_index[order(-zonal_index$mean),]
+  zonal_index <- zonal_index[order(zonal_index$value,decreasing = T),]
   return (zonal_index[1:top_num,])
 }
