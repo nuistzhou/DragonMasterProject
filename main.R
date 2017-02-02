@@ -208,6 +208,7 @@ print('---- Ending index-calculation ----')
 # ---- visualization ----
 source('R/vis.R')
 
+# ---- top-countries ----
 # Calculate Matrix of Top Countries
 source('R/matrix_top.R')
 ras_world <- rasterize(world,Index,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
