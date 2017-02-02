@@ -88,6 +88,8 @@ gecon <- read.xls('data/Gecon40_post_final.xls',sheet = 1, header = T)
 gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
 gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
 gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
+gecon$gecon.LAT <- gecon$gecon.LAT +1
+gecon$gecon.LONGITUDE <- gecon$gecon.LONGITUDE + 1
 coordinates(gecon) <- ~gecon.LONGITUDE + gecon.LAT
 gridded(gecon) <- T
 gecon@proj4string <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
@@ -95,8 +97,8 @@ gecon_mer <- raster(gecon["gecon.MER2005_40"])
 gecon_ppp <- raster(gecon["gecon.PPP2005_40"])
 gecon_mer@data@names <- 'gecon_mer'
 gecon_ppp@data@names <- 'gecon_ppp'
-writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff')
-writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff')
+writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff', overwrite = T)
+writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff', overwrite = T)
 rm(gecon)
 
 print('---- Ending read-files ----')
@@ -161,7 +163,6 @@ writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
 haz_comp <- raster('data/haz_comp.tif')
 r_ndvi_mean <- raster('data/r_ndvi_mean.tif')
 r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
-r_gecon_mer <- raster('data/r_gecon_mer.tif')
 r_annualpm25 <- raster('data/r_annualpm25.tif')
 
 # Masks and normalizes the data
