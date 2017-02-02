@@ -201,9 +201,12 @@ writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T, data
 print('---- Ending index-calculation ----')
 
 # ---- visualization ----
+print('---- Starting visualization ----')
 source('R/vis.R')
+print('---- Ending visualization ----')
 
 # ---- top-countries ----
+print('---- Starting top-countries ----')
 # Calculate Matrix of Top Countries
 source('R/matrix_top.R')
 ras_world <- rasterize(world,r_ndvi_mean,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
@@ -213,8 +216,17 @@ richest <- matrix_top(index05100505,world,ras_world,10)
 less_hazards <- matrix_top(index05051005,world,ras_world,10)
 less_polution <- matrix_top(index05050510,world,ras_world,10)
 
-index10101010 <- raster('data/index10101010.tif')
-index10050505 <- raster('data/index10050505.tif')
-index05100505 <- raster('data/index05100505.tif')
-index05051005 <- raster('data/index05051005.tif')
-index05050510 <- raster('data/index05050510.tif')
+print(same)
+print(greenest)
+print(richest)
+print(less_hazards)
+print(polution)
+
+print('---- Ending top-countries ----')
+print('---- Safe travels! ;) ----')
+
+#index10101010 <- raster('data/index10101010.tif')
+#index10050505 <- raster('data/index10050505.tif')
+#index05100505 <- raster('data/index05100505.tif')
+#index05051005 <- raster('data/index05051005.tif')
+#index05050510 <- raster('data/index05050510.tif')
