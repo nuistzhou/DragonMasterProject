@@ -1,4 +1,5 @@
 # Find top countries for each index
+# ras_index is the index raster, world is the spatialDataFrame of world map, ras_world is the world map raster, top_num is the number of top ones
 matrix_top <- function(ras_index,world,ras_world,top_num) {
 
   # Do zonal statistics on raster index based on raster world map
