@@ -4,10 +4,11 @@
 
 # ---- setup ----
 # Installs necessary requirements
-# system('./requirements.sh')
-# if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap)) {
-#  install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap'))
-#}
+print('---- Starting setup ----')
+
+if(!require(raster) | !require(tools) | !require(rgdal) | !require(gdalUtils) | !require(rworldmap) | !require(cleangeo) | !require(gdata)| !require(leaflet)| !require(htmltools)| !require(RColorBrewer)) {
+ install.packages(c('raster','tools','rgdal','gdalUtils','rworldmap', 'rworldxtra', 'cleangeo','gdata','leaflet', 'htmltools', 'RColorBrewer'))
+}
 
 # Libraries needed
 library(raster)
@@ -15,29 +16,48 @@ library(tools)
 library(rgdal)
 library(gdalUtils)
 library(rworldmap)
+library(cleangeo)
+library(gdata)
+library(leaflet)
+library(htmlwidgets)
+library(RColorBrewer)
 
+# Changes temp dir to location with space, at least 5 GB free
 rasterOptions(tmpdir="data/temp/")
+rasterOptions(maxmemory=1e+12)
 
 # Source files
 source('R/summary_data.R')
+source('R/ndvi_annual_mean.R')
+source('R/hazards_sum.R')
+source('R/calc_index.R')
+source('R/normalization.R')
+
+print('---- Ending setup ----')
 
 # ---- downloads ----
-# Runs the python script that downloads data available through WMS
-#system('python Python/sedac_haz_pm25.py')
+print('---- Starting downloads ----')
+# Downloads the hazards and PM2.5 datasets from SEDAC
+system('Bash/./sedac_haz_pm25.sh')
 
 # Runs the bash script that downloads the monthly MODIS NDVI data
-#system('Bash/./modis_ndvi.sh')
+system('Bash/./modis_ndvi.sh')
 
-# Runs the bash script that downloads the SEDAC GECON data (GDP per cell)
-#system('Bash/./sedac_gecon.sh')
+# Download GECON data xls
+download.file('http://gecon.yale.edu/sites/default/files/Gecon40_post_final.xls', 'data/Gecon40_post_final.xls')
+
+print('---- Ending downloads ----')
 
 # ---- read-files ----
+print('---- Starting read-files ----')
 # Loads the hazards dataset into memory
-hazards_files <- list.files('data', pattern = 'haz_*', full.names = T)
+hazards_files <- list.files('data', pattern = 'haz_?.*\\.asc', full.names = T)
 for (haz in hazards_files){
   assign(basename(file_path_sans_ext(haz)),raster(haz))
+  a <- get(basename(file_path_sans_ext(haz)))
+  a@data@names <- basename(file_path_sans_ext(haz))
 }
-rm(haz,hazards_files)
+rm(haz,hazards_files,a)
 
 # Loads NDVI monthly datasest into memory
 ndvi_files <- list.files('data', pattern = 'MOD13C2*', full.names = T)
@@ -56,42 +76,157 @@ for (i in 1:12){
 }
 rm(ndvi_files, ndvi.months, i)
 
-# Loads polution dataset into memory
-annualpm25 <- raster('data/annualpm25.tif')
+# Cleans data according to reliability, calculates the annual mean
+ndvi_mean <- ndvi_annual_mean(ndvi, ndvi_reliability)
+rm(ndvi,ndvi_reliability)
 
-# Loads GDP per cell datasets into memory (MER and PPP 2005)
-gecon_mer <- raster('data/gecon/MER2005sum.asc')
-gecon_ppp <- raster('data/gecon/PPP2005sum.asc')
+# Loads polution dataset into memory
+annualpm25 <- raster('data/annualpm25/annualpm25.tif')
+
+# Loads GECON data from XLS file
+gecon <- read.xls('data/Gecon40_post_final.xls',sheet = 1, header = T)
+gecon <- data.frame(gecon$LAT, gecon$LONGITUDE, gecon$PPP2005_40, gecon$MER2005_40)
+gecon$gecon.PPP2005_40 <- as.numeric(paste(gecon$gecon.PPP2005_40))
+gecon$gecon.MER2005_40 <- as.numeric(paste(gecon$gecon.MER2005_40))
+gecon$gecon.LAT <- gecon$gecon.LAT +0.5
+gecon$gecon.LONGITUDE <- gecon$gecon.LONGITUDE + 0.5
+coordinates(gecon) <- ~gecon.LONGITUDE + gecon.LAT
+gridded(gecon) <- T
+gecon@proj4string <- CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+gecon_mer <- raster(gecon["gecon.MER2005_40"])
+gecon_ppp <- raster(gecon["gecon.PPP2005_40"])
 gecon_mer@data@names <- 'gecon_mer'
 gecon_ppp@data@names <- 'gecon_ppp'
+writeRaster(gecon_mer,'data/gecon_mer.tif','GTiff')
+writeRaster(gecon_ppp,'data/gecon_ppp.tif','GTiff')
+rm(gecon)
+
+print('---- Ending read-files ----')
 
 # ---- files-info ----
+print('---- Starting files-info ----')
 # Gets all files into a vector that is passed to the data_summary func
-all_files <- c(c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano),ndvi,ndvi_reliability)
+all_files <- c(annualpm25, gecon_mer, gecon_ppp, haz_cyclone, haz_drought, haz_earthquake, haz_flood, haz_landslide, haz_volcano, ndvi_mean)
 data_summary <- summary_data(all_files)
 rm(all_files)
 
-# Make histograms of the data
-
-# Plot the data
-
-# Get the template raster object and the projection string
-min_resx <- min(unlist(data_summary[,'resx']))
-min_resy <- min(unlist(data_summary[,'resy']))                
-proj <- data_summary[which(data_summary[,'resx']==min_resx,data_summary[,'resy']==min_resy),]
-proj_str <- unlist(proj[1,'projargs'])
+# Get the template raster object and the projection string - WGS84, 2.5 minute grid
+minx <- min(unlist(data_summary[,'resx']))
+miny <- min(unlist(data_summary[,'resy']))
+proj <- data_summary[which(data_summary[,'resx']==minx,data_summary[,'resy']==miny),]
+proj_str <- proj[1,'projargs'][[1]]
 set_raster <- proj[1,'raster'][[1]]
-rm(proj, min_resx, min_resy)
+rm(proj)
+
+print('---- Ending files-info ----')
 
 # ---- file-preprocessing ----
-# Select all objects that have a different projection
-to_reproj <- data_summary[data_summary[,'projargs']!=proj_str,'raster']
-rm(data_summary)
+print('---- Starting file-preprocessing ----')
+print('---- This will take a while, grab a cup of coffee! :) ----')
+# Select all objects that have a different projection, nedd to add the different extents
+to_reproj <- data_summary[which(data_summary[,'projargs']!=proj_str|data_summary[,'resx']!=minx|data_summary[,'resy']!=miny|data_summary[,'ymin']!=set_raster@extent@ymin),'raster']
+rm(data_summary, proj_str, minx,miny)
 
-# Reprojects and resamples the objects - WHATCHOUT FOR MEMORY - changed tmp dir in the beginning, at least 5 GB
+# Reprojects and resamples the objects - changed tmp dir in the beginning, at least 5 GB free in dir
 for(r in to_reproj){
-  projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), overwrite = T)
+  projectRaster(r,set_raster,filename = paste0('data/r_',r@data@names,'.tif'), method = 'ngb', overwrite = T)
+  print(paste(r,'was reprojected!'))
 }
-rm(r,to_reproj)
+rm(r,to_reproj, set_raster)
 
-# Get data from crime statistics, terrorism? http://www.start.umd.edu/gtd/contact/, Human development index?
+# Reads reprojected files into memory
+r_files <- list.files('data', pattern = 'r_', full.names = T)
+for (r in r_files){
+  assign(basename(file_path_sans_ext(r)),raster(r))
+}
+rm(r,r_files)
+
+# Adds aditional information
+r_annualpm25@data@unit <- 'microg*m^-3'
+r_gecon_mer@data@unit <- 'Billions US dollars'
+r_gecon_ppp@data@unit <- 'Billions US dollars'
+
+# Gets continental (countries) boundaries
+world <- getMap()
+world <- spTransform(world, r_ndvi_mean@crs)
+simpleWorld <- gUnionCascaded(clgeo_Clean(world))
+
+print('---- Ending file-preprocessing ----')
+
+# ---- index-calculation ----
+print('---- Starting index-calculation ----')
+# Calculates the hazard component, (sum of all layers)
+haz_comp <- hazards_sum(r_haz_cyclone, haz_drought, r_haz_earthquake, r_haz_flood, haz_landslide, r_haz_volcano)
+writeRaster(haz_comp, 'data/haz_comp.tif', 'GTiff', overwrite =T)
+
+# To run if not from source
+haz_comp <- raster('data/haz_comp.tif')
+r_ndvi_mean <- raster('data/r_ndvi_mean.tif')
+r_gecon_ppp <- raster('data/r_gecon_ppp.tif')
+r_gecon_mer <- raster('data/r_gecon_mer.tif')
+r_annualpm25 <- raster('data/r_annualpm25.tif')
+
+# Masks and normalizes the data
+haz_comp <- normalization(haz_comp)
+r_ndvi_mean <- normalization(r_ndvi_mean)
+r_gecon_ppp <- normalization(r_gecon_ppp)
+r_gecon_mer <- normalization(r_gecon_mer)
+r_annualpm25 <- normalization(r_annualpm25)
+
+# Calculates the index, for 5 differente combinations of weights
+# Index - Same weight to all
+index10101010 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 1, 1, 1,simpleWorld)
+index10101010 <- index10101010*100
+writeRaster(index10101010, 'data/index10101010.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+
+# Index - Greenest
+index10050505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 1, 0.5, 0.5, 0.5,simpleWorld)
+index10050505 <- index10050505*100
+writeRaster(index10050505, 'data/index10050505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+
+# Index - Richest
+index05100505 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 1, 0.5, 0.5,simpleWorld)
+index05100505 <- index05100505*100
+writeRaster(index05100505, 'data/index05100505.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+
+# Index - Less hazards
+index05051005 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 1, 0.5,simpleWorld)
+index05051005 <- index05051005*100
+writeRaster(index05051005, 'data/index05051005.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+
+# Index - Less polution
+index05050510 <- calc_index(r_ndvi_mean,r_gecon_ppp, haz_comp, r_annualpm25, 0.5, 0.5, 0.5, 1,simpleWorld)
+index05050510 <- index05050510*100
+writeRaster(index05050510, 'data/index05050510.tif', 'GTiff', overwrite =T, datatype = 'INT2S')
+print('---- Ending index-calculation ----')
+
+# ---- visualization ----
+print('---- Starting visualization ----')
+source('R/vis.R')
+print('---- Ending visualization ----')
+
+# ---- top-countries ----
+print('---- Starting top-countries ----')
+# Calculate Matrix of Top Countries
+source('R/matrix_top.R')
+ras_world <- rasterize(world,r_ndvi_mean,as.numeric(world@data$ADMIN),fun=mean,na.rm=T)
+same <- matrix_top(index10101010,world,ras_world,10)
+greenest <- matrix_top(index10050505,world,ras_world,10)
+richest <- matrix_top(index05100505,world,ras_world,10)
+less_hazards <- matrix_top(index05051005,world,ras_world,10)
+less_polution <- matrix_top(index05050510,world,ras_world,10)
+
+print(same)
+print(greenest)
+print(richest)
+print(less_hazards)
+print(polution)
+
+print('---- Ending top-countries ----')
+print('---- Safe travels! ;) ----')
+
+#index10101010 <- raster('data/index10101010.tif')
+#index10050505 <- raster('data/index10050505.tif')
+#index05100505 <- raster('data/index05100505.tif')
+#index05051005 <- raster('data/index05051005.tif')
+#index05050510 <- raster('data/index05050510.tif')
